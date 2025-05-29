@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-db-main-service
+  namespace: mahasiswa-app
+spec:
+  selector:
+    app: postgres-main
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+  type: ClusterIP 

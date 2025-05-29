@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: mahasiswa-app
+data:
+  # --- Database Main ---
+  DATABASE_URL: "postgresql://user:password@postgres-db-main-service:5432/mahasiswa_db"
+
+  # --- Database Log ---
+  LOG_DATABASE_URL: "postgresql://log_user:log_password@postgres-db-log-service:5432/log_db"
+
+  # --- Kafka ---
+  KAFKA_BROKERS: "kafka-service:9092" # Untuk internal cluster
+  KAFKA_TOPIC: "mahasiswa_events"
+
+  # --- REST API ---
+  API_PORT: "3000"
+
+  # --- Consumer Service ---
+  CONSUMER_GROUP_ID: "log_processors_group_k8s"
+  KAFKA_CONSUME_FROM_BEGINNING: "true"

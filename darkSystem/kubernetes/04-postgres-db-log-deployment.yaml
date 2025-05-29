@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-db-log
+  namespace: mahasiswa-app # Pastikan namespace sama
+  labels:
+    app: postgres-log # Label unik untuk service log DB
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-log # Harus cocok dengan label di template
+  template:
+    metadata:
+      labels:
+        app: postgres-log # Label untuk Pod
+    spec:
+      containers:
+      - name: postgres-log-container # Nama container
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "log_user" # User berbeda untuk log DB
+        - name: POSTGRES_PASSWORD
+          value: "log_password" # Password berbeda (gunakan Secrets di produksi)
+        - name: POSTGRES_DB
+          value: "log_db" # Nama database berbeda untuk log
+        volumeMounts:
+        - name: postgres-log-storage # Nama volume mount
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-log-storage # Nama volume
+        persistentVolumeClaim:
+          claimName: postgres-log-pvc # Nama PVC yang berbeda untuk log DB
+---
+# Contoh PVC (PersistentVolumeClaim) untuk postgres-log-pvc
+# Anda perlu membuat PVC ini atau memiliki storage provisioner
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: postgres-log-pvc
+#   namespace: mahasiswa-app
+# spec:
+#   accessModes:
+#     - ReadWriteOnce # Sesuai storage class Anda
+#   resources:
+#     requests:
+#       storage: 1Gi # Sesuaikan ukuran untuk log DB

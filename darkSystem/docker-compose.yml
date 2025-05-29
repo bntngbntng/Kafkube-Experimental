@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.3
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.3
+    container_name: kafka
+    ports:
+      - "9092:9092" # For internal Docker network
+      - "29092:29092" # For host access
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1 # for single broker cluster
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 # for single broker cluster
+    healthcheck:
+        test: ["CMD-SHELL", "kafka-topics --bootstrap-server kafka:9092 --list || exit 1"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+
+  postgres_db_main:
+    image: postgres:15-alpine
+    container_name: postgres_db_main
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mahasiswa_db
+    volumes:
+      - postgres_main_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mahasiswa_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres_db_log:
+    image: postgres:15-alpine
+    container_name: postgres_db_log
+    ports:
+      - "5433:5432" # Different host port
+    environment:
+      POSTGRES_USER: log_user
+      POSTGRES_PASSWORD: log_password
+      POSTGRES_DB: log_db
+    volumes:
+      - postgres_log_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U log_user -d log_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rest_api:
+    build: ./rest-api-mahasiswa
+    container_name: rest_api_mahasiswa
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres_db_main:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://user:password@postgres_db_main:5432/mahasiswa_db
+      KAFKA_BROKERS: kafka:9092 # Use internal Docker DNS name
+      KAFKA_TOPIC: mahasiswa_events
+      KAFKA_CLIENT_ID: mahasiswa-api-producer-compose
+
+  consumer_service:
+    build: ./consumer-service
+    container_name: consumer_service_mahasiswa
+    depends_on:
+      postgres_db_log:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      LOG_DATABASE_URL: postgresql://log_user:log_password@postgres_db_log:5432/log_db
+      KAFKA_BROKERS: kafka:9092 # Use internal Docker DNS name
+      KAFKA_TOPIC: mahasiswa_events
+      KAFKA_CONSUMER_GROUP: log_processors_group_compose
+      KAFKA_CONSUME_FROM_BEGINNING: "true"
+
+volumes:
+  postgres_main_data:
+  postgres_log_data:

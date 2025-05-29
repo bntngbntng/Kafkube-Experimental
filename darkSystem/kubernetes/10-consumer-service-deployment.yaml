@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer-service
+  namespace: mahasiswa-app
+  labels:
+    app: consumer-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer-service
+  template:
+    metadata:
+      labels:
+        app: consumer-service
+    spec:
+      containers:
+      - name: consumer-service-container
+        image: pppercivalll/consumer-service
+        imagePullPolicy: Always
+        env:
+        - name: LOG_DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: LOG_DATABASE_URL
+        - name: KAFKA_BROKERS
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: KAFKA_BROKERS
+        - name: KAFKA_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: KAFKA_TOPIC
+        - name: KAFKA_CONSUMER_GROUP
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: CONSUMER_GROUP_ID
+        - name: KAFKA_CONSUME_FROM_BEGINNING
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: KAFKA_CONSUME_FROM_BEGINNING
+        # KAFKA_CLIENT_ID di consumer akan digenerate otomatis

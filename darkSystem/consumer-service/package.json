@@ -1,0 +1,13 @@
+{
+  "name": "consumer-service",
+  "version": "1.0.0",
+  "description": "Kafka Consumer service untuk logging Mahasiswa events",
+  "main": "src/consumer.js",
+  "scripts": {
+    "start": "node src/consumer.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.3",
+    "kafkajs": "^2.2.4"
+  }
+}
