@@ -1,88 +1,61 @@
 # Kafkube Experimental
 
-Proyek ini mengimplementasikan sistem REST API untuk data mahasiswa yang terintegrasi dengan Apache Kafka untuk pemrosesan event secara *asynchronous*. Semua layanan dijalankan dalam kontainer Docker dan di-orkestrasi menggunakan Kubernetes.
+This project implements a REST API system for student data integrated with Apache Kafka for asynchronous event processing. All services run in Docker containers and are orchestrated using Kubernetes.
 
-## Arsitektur Umum
+## Tech Stacks
 
-Sistem ini terdiri dari beberapa komponen utama:
-1.  **User**: Mengakses API.
-2.  **REST API Mahasiswa** (Node.js/Express): Menerima request, menyimpan data ke DB utama, dan memublikasikan event ke Kafka.
-3.  **Database Utama** (PostgreSQL): Menyimpan data master mahasiswa.
-4.  **Apache Kafka**: Sebagai *message broker* untuk event.
-5.  **Consumer Service** (Node.js): Membaca event dari Kafka dan menyimpannya ke DB Log.
-6.  **Database Log** (PostgreSQL): Menyimpan log event untuk audit/analitik.
-7.  **Docker**: Untuk mengemas setiap layanan ke dalam kontainer.
-8.  **Kubernetes**: Untuk orkestrasi, *scaling*, dan *deployment* kontainer.
-
----
-## Prasyarat
-
-Sebelum memulai, pastikan Anda telah menginstal perangkat lunak berikut:
-* **Docker & Docker Compose**: Untuk menjalankan aplikasi secara lokal dan membangun *image*.
-* **Minikube** (atau cluster Kubernetes lainnya seperti Kind, Docker Desktop Kubernetes, GKE, EKS, AKS).
-* **`kubectl`**: Kubernetes Command Line Interface, sudah terkonfigurasi untuk terhubung ke cluster Anda.
-* **Helm (v3+)**: Jika Anda memilih metode *deployment* dengan Helm Chart.
-* **Node.js & npm**: Untuk pengembangan lokal layanan API dan Consumer (jika ingin memodifikasi).
-* **Git**: Untuk meng-clone repositori (jika proyek ini ada di Git).
+The system consists of several main components:
+1.  **User**: Accesses the API.
+2.  **REST API Mahasiswa** (Node.js/Express):  Handles requests, stores data in the main DB, and publishes events to Kafka.
+3.  **Database Utama** (PostgreSQL): Stores master student data.
+4.  **Apache Kafka**: Acts as a message broker for events.
+5.  **Consumer Service** (Node.js): Consumes events from Kafka and stores them in the log DB.
+6.  **Database Log** (PostgreSQL): Stores event logs for auditing and analytics.
+7.  **Docker**: Packages each service into containers.
+8.  **Kubernetes**: Orchestrates, scales, and deploys containers.
 
 ---
-## Struktur Proyek (Contoh)
-kafka-mahasiswa-k8s/
-├── rest-api-mahasiswa/         # Kode sumber REST API (Node.js/Express)
-│   ├── src/
-│   ├── package.json
-│   └── Dockerfile
-├── consumer-service/           # Kode sumber Consumer Service (Node.js)
-│   ├── src/
-│   ├── package.json
-│   └── Dockerfile
-├── kubernetes/                 # Manifest Kubernetes
-│   ├── 00-namespace.yaml
-│   ├── 01-configmap.yaml
-│   ├── 02-postgres-db-main-deployment.yaml # (Manual)
-│   ├── 03-postgres-db-main-service.yaml    # (Manual)
-│   ├── pvc-main.yaml                       # (Manual)
-│   ├── 04-postgres-db-log-deployment.yaml  # (Manual)
-│   ├── 05-postgres-db-log-service.yaml     # (Manual)
-│   ├── pvc-log.yaml                        # (Manual)
-│   ├── 06-kafka-deployment.yaml            # (Manual, sangat sederhana)
-│   ├── 07-kafka-service.yaml               # (Manual)
-│   ├── 08-rest-api-deployment.yaml
-│   ├── 09-rest-api-service.yaml
-│   ├── 10-consumer-service-deployment.yaml
-│   ├── values-postgres-main.yaml           # Kustomisasi Helm untuk DB Utama
-│   ├── values-postgres-log.yaml            # Kustomisasi Helm untuk DB Log
-│   └── values-kafka.yaml                   # Kustomisasi Helm untuk Kafka
-├── docker-compose.yml          # Untuk pengembangan lokal
-└── README.md                   # File ini
----
-## Pengembangan Lokal dengan Docker Compose
+## Requirements
 
-Untuk menjalankan seluruh tumpukan aplikasi secara lokal untuk pengembangan dan pengujian awal:
-1.  Pastikan Docker Engine dan Docker Compose berjalan.
-2.  Dari direktori root proyek (`kafka-mahasiswa-k8s/`), jalankan:
+Ensure the following software is installed:
+* **Docker & Docker Compose**: For local development and building *image*.
+* **Minikube**  (or another Kubernetes cluster like Kind, Docker Desktop K8s, GKE, EKS, AKS).
+* **`kubectl`**: Kubernetes CLI, configured to connect to your cluster.
+* **Helm (v3+)**: If using the Helm *deployment* method.
+* **Node.js & npm**: For local development or modifying services.
+* **Git**: To clone the repository (if hosted on GitHub or similar).
+
+---
+## Project Structure
+---
+## Local Development with Docker Compose
+
+To run the entire stack locally for development/testing:
+1.  Ensure Docker Engine and Docker Compose are running.
+2.  From the root directory (`darkSystem/`), execute
     ```bash
     docker-compose up --build
     ```
-3.  Setelah semua layanan berjalan (cek log), REST API akan tersedia di `http://localhost:3000`.
-    * Database utama (PostgreSQL): `localhost:5432`
+3.  Once all services are up: 
+    * REST API will be available at `http://localhost:3000`.
+    * Database main (PostgreSQL): `localhost:5432`
     * Database log (PostgreSQL): `localhost:5433`
-    * Kafka (advertised listener untuk host): `localhost:29092`
+    * Kafka (advertised listener for host): `localhost:29092`
 
 ---
-## Deployment ke Kubernetes
+## Kubernetes Deployment
 
-Ada dua metode yang dijelaskan di sini:
-1.  **Manual**: Menggunakan file YAML Kubernetes untuk semua komponen.
-2.  **Dengan Helm**: Menggunakan Helm Chart untuk PostgreSQL dan Kafka, dan file YAML manual untuk layanan aplikasi (REST API & Consumer).
+There are two deployment methods:
+1.  **Manual**: using Kubernetes YAML manifests.
+2.  **Dengan Helm**: for deploying PostgreSQL and Kafka (recommended), with manual YAML for app services.
 
-**Sebelum Deployment (Kedua Metode):**
-1.  **Bangun dan Push Docker Image Aplikasi:**
-    Navigasi ke direktori masing-masing layanan dan bangun *image Docker*. Ganti `<YOUR_DOCKER_REGISTRY_USERNAME>` dengan username Docker Hub Anda atau *path* ke *registry* privat Anda.
+**Pre-deployment Steps (Both Methods):**
+1.  **Build & Push Docker Images:**
+    Replace <YOUR_DOCKER_REGISTRY_USERNAME> with your Docker Hub username or private registry path. But before that, you shall login into Docker Hub and configure "docker login" first for further development. Skip this step if you already had one or just use my image.
     ```bash
-    # Untuk REST API
+    # For REST API
     cd rest-api-mahasiswa/
-    docker build -t <YOUR_DOCKER_REGISTRY_USERNAME>/rest-api-mahasiswa:latest .
+    docker build -t <YOUR_DOCKER_REGISTRY_USERNAME>/rest-api-mahasiswa:latest .	
     docker push <YOUR_DOCKER_REGISTRY_USERNAME>/rest-api-mahasiswa:latest
     cd ..
 
@@ -92,125 +65,124 @@ Ada dua metode yang dijelaskan di sini:
     docker push <YOUR_DOCKER_REGISTRY_USERNAME>/consumer-service:latest
     cd ..
     ```
-    *(Jika menggunakan Minikube dan ingin memakai image lokal tanpa push, gunakan `eval $(minikube -p minikube docker-env)` sebelum build, dan set `imagePullPolicy: IfNotPresent` atau `Never` di file Deployment YAML).*
+    *Alternatively (for Minikube only), you can use eval $(minikube -p minikube docker-env).*
 
-2.  **Pastikan `kubectl` Terhubung ke Cluster Minikube Anda:**
+2.  **Ensure ``kubectl`` is connected to your Minikube cluster:**
     ```bash
-    minikube start # Jika belum berjalan
-    kubectl config use-context minikube # Mengatur kubectl untuk Minikube
-    kubectl get nodes # Harus menampilkan node Minikube Anda
+    minikube start
+    kubectl config use-context minikube
+    kubectl get nodes
     ```
 
-### Metode 1: Deployment Manual dengan File YAML
+### Method 1: Manual Deployment with YAML Files
 
-Metode ini menggunakan file-file YAML yang ada di direktori `kubernetes/` untuk setiap komponen.
+This method is now using files that located in `kubernetes/` for every components. Ergo, make sure you are on that directory.
 
-1.  **Buat Namespace:**
+1.  **Create Namespace:**
     ```bash
     kubectl apply -f kubernetes/00-namespace.yaml
     ```
-    Semua resource selanjutnya akan di-deploy ke namespace `mahasiswa-app`.
+    All the resources will be deployed to the namespace `mahasiswa-app`.
 
-2.  **Buat PersistentVolumeClaims (PVCs):**
+2.  **Create Persistent Volume Claims (PVCs):**
     ```bash
     kubectl apply -f kubernetes/pvc-main.yaml -n mahasiswa-app
     kubectl apply -f kubernetes/pvc-log.yaml -n mahasiswa-app
     ```
-    Tunggu hingga status PVC menjadi `Bound`: `kubectl get pvc -n mahasiswa-app`
+    Wait until the PVC status become `Bound` also, run: `kubectl get pvc -n mahasiswa-app`
 
-3.  **Buat ConfigMap:**
+3.  **Create ConfigMap:**
     ```bash
     kubectl apply -f kubernetes/01-configmap.yaml -n mahasiswa-app
     ```
 
-4.  **Deploy Database Utama (PostgreSQL):**
+4.  **Deploy Main PostgreSQL DB:**
     ```bash
     kubectl apply -f kubernetes/02-postgres-db-main-deployment.yaml -n mahasiswa-app
     kubectl apply -f kubernetes/03-postgres-db-main-service.yaml -n mahasiswa-app
     ```
 
-5.  **Deploy Database Log (PostgreSQL):**
+5.  **Deploy Log PostgreSQL DB:**
     ```bash
     kubectl apply -f kubernetes/04-postgres-db-log-deployment.yaml -n mahasiswa-app
     kubectl apply -f kubernetes/05-postgres-db-log-service.yaml -n mahasiswa-app
     ```
 
-6.  **Deploy Kafka (Contoh Sederhana):**
-    **Peringatan:** Konfigurasi Kafka ini sangat dasar dan tidak untuk produksi.
+6.  **Deploy Kafka (Simple configuration, not production-ready):**
     ```bash
     kubectl apply -f kubernetes/06-kafka-deployment.yaml -n mahasiswa-app
     kubectl apply -f kubernetes/07-kafka-service.yaml -n mahasiswa-app
     ```
-    Tunggu Pods database dan Kafka `Running` dan `READY` sebelum melanjutkan: `kubectl get pods -n mahasiswa-app -w`
+    Wait for all the Pods database and Kafka until `Running` and `READY` before keeping up to later step. Run this command also: `kubectl get pods -n mahasiswa-app -w`
 
 7.  **Deploy REST API Mahasiswa:**
-    Pastikan Anda sudah mengganti placeholder *image* di `08-rest-api-deployment.yaml`.
+    Update the image field in 08-rest-api-deployment.yaml before applying. Skip if you wanted it otherwise (since I already build and push the images in my Docker repository).
     ```bash
     kubectl apply -f kubernetes/08-rest-api-deployment.yaml -n mahasiswa-app
     kubectl apply -f kubernetes/09-rest-api-service.yaml -n mahasiswa-app
     ```
 
 8.  **Deploy Consumer Service:**
-    Pastikan Anda sudah mengganti placeholder *image* di `10-consumer-service-deployment.yaml`.
+    Update the image field in `10-consumer-service-deployment.yaml`. Skip if you wanted it otherwise (since I already build and push the images in my Docker repository).
     ```bash
     kubectl apply -f kubernetes/10-consumer-service-deployment.yaml -n mahasiswa-app
     ```
 
-### Metode 2: Deployment dengan Helm (PostgreSQL & Kafka) + YAML (Aplikasi)
+### Method 2: Deployment Using Helm + YAML
 
-Metode ini menggunakan Helm Chart untuk PostgreSQL dan Kafka, yang lebih direkomendasikan untuk komponen *stateful*.
+This method is now using the Helm Chart for PostgreSQL dan Kafka, would be more robust and efficient.
 
-1.  **Instal Helm CLI** (jika belum).
+1.  **Install Helm CLI** (if not already. You can also move into /kubernetes directory and find get-helm.sh, then chmod' it already).
 
-2.  **Buat Namespace** (jika belum dibuat):
+2.  **Create Namespace:** (if not to be created):
     ```bash
     kubectl apply -f kubernetes/00-namespace.yaml
-    # atau biarkan Helm yang membuatkannya dengan flag --create-namespace
+    # or just leave it and let Helm cook flag --create-namespace
     ```
 
-3.  **Tambahkan Repositori Helm Bitnami:**
+3.  **Add Helm Bitnami Repository:**
     ```bash
     helm repo add bitnami [https://charts.bitnami.com/bitnami](https://charts.bitnami.com/bitnami)
     helm repo update
     ```
 
-4.  **Deploy Database Utama dengan Helm:**
-    Gunakan file `kubernetes/values-postgres-main.yaml` untuk kustomisasi (sesuaikan *password*, *username*, *database name*, *storage size*).
+4.  **Deploy Database Utama with Helm:**
+    You can employ this `kubernetes/values-postgres-main.yaml` to customize (adjust your own *password*, *username*, *database name*, *storage size*).
     ```bash
     helm install postgres-main bitnami/postgresql \
       -f kubernetes/values-postgres-main.yaml \
       --namespace mahasiswa-app --create-namespace
     ```
 
-5.  **Deploy Database Log dengan Helm:**
-    Gunakan file `kubernetes/values-postgres-log.yaml`.
+5.  **Deploy Database Log with Helm:**
+    By using this `kubernetes/values-postgres-log.yaml`.
     ```bash
     helm install postgres-log bitnami/postgresql \
       -f kubernetes/values-postgres-log.yaml \
       --namespace mahasiswa-app
     ```
 
-6.  **Deploy Kafka dengan Helm:**
-    Gunakan file `kubernetes/values-kafka.yaml`.
+6.  **Deploy Kafka with Helm:**
+    Use this `kubernetes/values-kafka.yaml`.
     ```bash
     helm install kafka bitnami/kafka \
       -f kubernetes/values-kafka.yaml \
       --namespace mahasiswa-app
     ```
-    Tunggu hingga semua Pods dari Helm (PostgreSQL, Zookeeper, Kafka) `Running` dan `READY`.
+    Until all the Pods from Helm (PostgreSQL, Zookeeper, Kafka) are `Running` and `READY`.
 
-7.  **Perbarui dan Terapkan ConfigMap:**
-    Setelah instalasi Helm, nama *service* untuk PostgreSQL dan Kafka mungkin berbeda.
-    * Cek nama *service* PostgreSQL: `kubectl get svc -n mahasiswa-app -l app.kubernetes.io/instance=postgres-main` (biasanya `<release-name>-postgresql`, misal `postgres-main-postgresql`).
-    * Cek nama *service* Kafka: `kubectl get svc -n mahasiswa-app -l app.kubernetes.io/instance=kafka` (biasanya `<release-name>-headless` atau `<release-name>`, misal `kafka-headless`).
-    Edit file `kubernetes/01-configmap.yaml` untuk menyesuaikan `DATABASE_URL`, `LOG_DATABASE_URL`, dan `KAFKA_BROKERS` dengan nama *service* yang benar dari Helm.
-    Lalu, terapkan ConfigMap:
+7.  **Update ConfigMap:**
+    After Helm deployed, update kubernetes/01-configmap.yaml with correct service names and apply:
+    * Check the PostgreSQL service: `kubectl get svc -n mahasiswa-app -l app.kubernetes.io/instance=postgres-main` (usually `<release-name>-postgresql`, for example `postgres-main-postgresql`).
+    * Check the Kafka service: `kubectl get svc -n mahasiswa-app -l app.kubernetes.io/instance=kafka` (usually `<release-name>-headless` or `<release-name>`, for example `kafka-headless`).
+    Edit this file `kubernetes/01-configmap.yaml` to adjust the `DATABASE_URL`, `LOG_DATABASE_URL`, the `KAFKA_BROKERS` with *service* name from Helm properly.
+    And, apply ConfigMap:
     ```bash
     kubectl apply -f kubernetes/01-configmap.yaml -n mahasiswa-app
     ```
 
 8.  **Deploy REST API dan Consumer Service (menggunakan YAML manual):**
-    Sama seperti Langkah 7 & 8 di Metode 1. Pastikan *image* sudah benar.
+    Well, you can use previous .yaml-08 till 10 for this.
     ```bash
     kubectl apply -f kubernetes/08-rest-api-deployment.yaml -n mahasiswa-app
     kubectl apply -f kubernetes/09-rest-api-service.yaml -n mahasiswa-app
@@ -218,93 +190,91 @@ Metode ini menggunakan Helm Chart untuk PostgreSQL dan Kafka, yang lebih direkom
     ```
 
 ---
-## Mengakses Aplikasi di Kubernetes
+## Accessing the Application
 
-Setelah *deployment* berhasil, Anda bisa mengakses REST API.
-* Jika Service REST API menggunakan `type: LoadBalancer` (dan cluster Anda mendukungnya):
+After *deployment* is done, You can freely access the REST API.
+* If the REST API Service uses `type: LoadBalancer`  (with supported cluster):
     ```bash
     kubectl get svc rest-api-mahasiswa-service -n mahasiswa-app
     ```
-    Gunakan `EXTERNAL-IP` yang ditampilkan.
-* Jika menggunakan Minikube dengan `type: LoadBalancer` atau `NodePort`:
+    Use the EXTERNAL-IP that was just displayed.
+* Minikube with LoadBalancer/NodePort:
     ```bash
     minikube service rest-api-mahasiswa-service -n mahasiswa-app --url
     ```
-    Ini akan membuka URL di browser atau menampilkan URL-nya.
-* Menggunakan `kubectl port-forward`:
+* Using Port Forwarding:
     ```bash
     kubectl port-forward svc/rest-api-mahasiswa-service -n mahasiswa-app 8080:80
     ```
-    Akses API di `http://localhost:8080`.
+    # Access at http://localhost:8080
 
 ---
-## Skenario Pengujian
+## Testing Scenarios
 
-Berikut adalah ringkasan skenario pengujian. Pastikan semua layanan berjalan di Kubernetes.
+The following is a summary of the test scenarios. Make sure all services are running in Kubernetes.
 
 ### 1. Event Publish Test
-* **Tujuan**: API memublikasikan event ke Kafka.
-* **Cara**:
-    1.  Listen ke topic Kafka `mahasiswa_events` menggunakan `kcat` (sebelumnya `kafkacat`):
+* **Goals**: Ensure events are published to Kafka.
+* **Steps**:
+    1.  Listen to Kafka topic mahasiswa_events:
         ```bash
-        # Ganti kafka-headless.mahasiswa-app.svc.cluster.local:9092 jika nama service Kafka Anda berbeda
         kubectl run kafkacat-listener -n mahasiswa-app --image=edenhill/kcat:1.7.1 --restart=Never --rm -it -- \
         kcat -b kafka-headless.mahasiswa-app.svc.cluster.local:9092 -t mahasiswa_events -C -J -q
         ```
-    2.  Kirim request `POST` ke endpoint `/api/mahasiswa` pada REST API Anda dengan data mahasiswa baru.
-* **Hasil**: Catat request & response API. Verifikasi pesan JSON muncul di `kafkacat-listener` (cek `eventType`, `data`, `timestamp_api_sent`).
+    2.  Submit a POST request to the /api/mahasiswa endpoint of your REST API with the new student information.
+* **Results**: Record the API request and response. Verify that the JSON message appears in kafkacat-listener (check eventType, data, and timestamp_api_sent).
 
 ### 2. Consumer Test
-* **Tujuan**: Consumer memproses event dan menyimpan log.
-* **Cara**:
-    1.  Kirim request `POST` ke API seperti di atas.
-    2.  Tunggu beberapa saat.
-    3.  Port-forward ke service database log (misal `postgres-log-postgresql` jika pakai Helm, atau `postgres-db-log-service` jika manual):
+* **Goals**: Ensure the consumer processes events and logs them correctly.
+* **Steps**:
+    1.  Send a POST request to the API as described above.
+    2.  Wait a few moments.
+    3.  Port-forward to the log database service (e.g., postgres-log-postgresql if using Helm, or postgres-db-log-service if set up manually):
         ```bash
-        # Sesuaikan nama service dan port lokal jika perlu
+        # Adjust the service name and local port if needed
         kubectl port-forward svc/<nama-service-db-log> -n mahasiswa-app 5433:5432
         ```
-    4.  Gunakan tool DB (DBeaver, pgAdmin) untuk terhubung ke `localhost:5433` dan periksa tabel `event_logs`.
-    5.  Cek log pod consumer: `kubectl logs -l <label-selector-consumer> -n mahasiswa-app -f`.
-* **Hasil**: Screenshot data baru di `event_logs`. Verifikasi `event_type`, `payload`, dan semua *timestamp*.
+    4.  Use a database tool (e.g., DBeaver, pgAdmin) to connect to localhost:5433 and check the event_logs table.
+    5.  Check the consumer pod logs: `kubectl logs -l <label-selector-consumer> -n mahasiswa-app -f`.
+* **Results**: A screenshot of the new data in event_logs. Verify event_type, payload, and all timestamps.
 
 ### 3. Integration Test
-* **Tujuan**: Semua komponen terhubung dan berfungsi.
+* **Goals**: Verify all components are connected and functioning end-to-end.
 * **Cara**:
-    1.  Pastikan semua pods (`rest-api`, `consumer-service`, Kafka, DBs) `Running`: `kubectl get pods -n mahasiswa-app`.
-    2.  Cek `ConfigMap` (`kubectl get cm app-config -n mahasiswa-app -o yaml`) dan env var di pod API/Consumer (`kubectl exec <pod> -n mahasiswa-app -- printenv`).
-    3.  Lakukan alur end-to-end: `POST` data -> Cek DB Utama (port-forward ke service DB utama) -> (Opsional) Cek Kafka -> Cek DB Log.
-* **Hasil**: Screenshot status pods & services. Catat alur data sukses.
+    1.  Ensure all pods (rest-api, consumer-service, Kafka, DBs) are in Running state: `kubectl get pods -n mahasiswa-app`.
+    2.  Check the ConfigMap: (`kubectl get cm app-config -n mahasiswa-app -o yaml`) and environment variables in API/Consumer pods:(`kubectl exec <pod> -n mahasiswa-app -- printenv`).
+    3.  Perform the full end-to-end flow: `POST` data -> Check Main DB (via port-forward) -> (Optional) Check Kafka -> Check DB Log.
+* **Results**: Screenshot of pod and service statuses. Document successful data flow.
 
 ### 4. Horizontal Scaling Test (Consumer Service)
-* **Tujuan**: Tidak ada duplikasi pemrosesan saat consumer di-scale.
-* **Cara**:
-    1.  Awalnya `consumer-service` deployment memiliki `replicas: 1`.
-    2.  Kirim beberapa pesan. Verifikasi tidak ada duplikasi di `event_logs`.
-    3.  Scale: `kubectl scale deployment consumer-service -n mahasiswa-app --replicas=2` (atau 3).
-    4.  Tunggu pod baru `Running`.
-    5.  Kirim beberapa pesan lagi.
-* **Hasil**: Screenshot `kubectl get pods -n mahasiswa-app -l <label-selector-consumer>`. Cek log semua pod consumer. **PENTING**: Verifikasi di `event_logs` bahwa tidak ada duplikasi pemrosesan untuk pesan yang dikirim setelah scaling.
+* **Goals**: Ensure no duplicate processing occurs when scaling the consumer.
+* **Steps**:
+    1.  Initially, ensure the consumer-service deployment is set to replicas: 1.
+    2.  Send several messages. Verify no duplicates in event_logs.
+    3.  Scale: `kubectl scale deployment consumer-service -n mahasiswa-app --replicas=2` (or 3).
+    4.  Wait for the new pods to reach Running state..
+    5.  Send additional messages.
+* **Results**: Screenshot of: `kubectl get pods -n mahasiswa-app -l <label-selector-consumer>`. Check logs from all consumer pods. **CAUTION**: Verify that no duplicate entries exist in event_logs.
 
 ### 5. Latency Test
-* **Tujuan**: Mengukur delay end-to-end.
-* **Cara**:
-    1.  Kirim 10-20 request `POST` ke API.
-    2.  Ambil data dari `event_logs` (terutama `timestamp_api_sent`, `timestamp_kafka_received`, `timestamp_processed`).
-    3.  Hitung:
+* **Goals**: Measure end-to-end delay.
+* **Steps**:
+    1.  Send 10–20 POST requests to the API.
+    2.  Retrieve data from the event_logs table, focusing on: (timestamp_api_sent, timestamp_kafka_received, timestamp_processed).
+    3.  Calculate:
         * $L_{end-to-end} = \text{timestamp_processed} - \text{timestamp_api_sent}$
         * $L_{consumer\_processing} = \text{timestamp_processed} - \text{timestamp_kafka_received}$
         * $L_{kafka\_queue} = \text{timestamp_kafka_received} - \text{timestamp_api_sent}$
-* **Hasil**: Tabel data timestamp & latensi. Hitung statistik (rata-rata, min, max, P95, P99).
+* **Results**: Table of timestamps and latency values. Compute statistics: average, min, max, P95, and P99.
 
 ---
-## Pembersihan (Cleanup)
+## Cleanup
 
-Untuk menghapus semua resource yang telah di-deploy:
+Deleting all deployed resources.
 
-**Jika menggunakan Metode 1 (Manual YAML):**
 ```bash
-# Hapus semua resource dari file YAML di direktori kubernetes (dalam namespace)
+# Method Manual
+# Delete YAML in /kubernetes directory (in a namespace)
 kubectl delete -f kubernetes/10-consumer-service-deployment.yaml -n mahasiswa-app
 kubectl delete -f kubernetes/09-rest-api-service.yaml -n mahasiswa-app
 kubectl delete -f kubernetes/08-rest-api-deployment.yaml -n mahasiswa-app
@@ -317,24 +287,25 @@ kubectl delete -f kubernetes/02-postgres-db-main-deployment.yaml -n mahasiswa-ap
 kubectl delete -f kubernetes/01-configmap.yaml -n mahasiswa-app
 kubectl delete -f kubernetes/pvc-log.yaml -n mahasiswa-app
 kubectl delete -f kubernetes/pvc-main.yaml -n mahasiswa-app
-# Terakhir, hapus namespace
+# Lastly, delete this shit
 kubectl delete -f kubernetes/00-namespace.yaml
 
-# Hapus rilis Helm
+# Method Helm
+# Delete Helm
 helm uninstall postgres-main -n mahasiswa-app
 helm uninstall postgres-log -n mahasiswa-app
 helm uninstall kafka -n mahasiswa-app
 
-# Hapus resource aplikasi yang di-deploy manual
+# Delete application resources that were deployed manually.
 kubectl delete -f kubernetes/10-consumer-service-deployment.yaml -n mahasiswa-app
 kubectl delete -f kubernetes/09-rest-api-service.yaml -n mahasiswa-app
 kubectl delete -f kubernetes/08-rest-api-deployment.yaml -n mahasiswa-app
 kubectl delete -f kubernetes/01-configmap.yaml -n mahasiswa-app # Jika tidak terhapus otomatis atau ingin bersih
 
-# Hapus PVCs (Helm mungkin tidak otomatis menghapus PVC tergantung konfigurasi chart)
-kubectl delete pvc postgres-main-postgresql-0 -n mahasiswa-app # Nama PVC mungkin berbeda, cek dengan `kubectl get pvc -n mahasiswa-app`
+# Delete PVCs (Helm may not automatically delete PVCs depending on the chart configuration)
+kubectl delete pvc postgres-main-postgresql-0 -n mahasiswa-app  # PVC name may vary, check with `kubectl get pvc -n mahasiswa-app`
 kubectl delete pvc postgres-log-postgresql-0 -n mahasiswa-app
-kubectl delete pvc data-kafka-0 -n mahasiswa-app # Nama PVC Kafka juga cek
+kubectl delete pvc data-kafka-0 -n mahasiswa-app # Also check the Kafka PVC name
 
-# Terakhir, hapus namespace
+# Lastly, delete this shit
 kubectl delete -f kubernetes/00-namespace.yaml
