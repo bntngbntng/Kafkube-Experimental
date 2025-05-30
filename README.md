@@ -47,7 +47,7 @@ To run the entire stack locally for development/testing:
 
 There are two deployment methods:
 1.  **Manual**: using Kubernetes YAML manifests.
-2.  **Dengan Helm**: for deploying PostgreSQL and Kafka (recommended), with manual YAML for app services.
+2.  **Helm Method**: for deploying PostgreSQL and Kafka (recommended), with manual YAML for app services.
 
 **Pre-deployment Steps (Both Methods):**
 1.  **Build & Push Docker Images:**
@@ -240,7 +240,7 @@ The following is a summary of the test scenarios. Make sure all services are run
 
 ### 3. Integration Test
 * **Goals**: Verify all components are connected and functioning end-to-end.
-* **Cara**:
+* **Steps**:
     1.  Ensure all pods (rest-api, consumer-service, Kafka, DBs) are in Running state: `kubectl get pods -n mahasiswa-app`.
     2.  Check the ConfigMap: (`kubectl get cm app-config -n mahasiswa-app -o yaml`) and environment variables in API/Consumer pods:(`kubectl exec <pod> -n mahasiswa-app -- printenv`).
     3.  Perform the full end-to-end flow: `POST` data -> Check Main DB (via port-forward) -> (Optional) Check Kafka -> Check DB Log.
