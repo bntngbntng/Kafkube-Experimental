@@ -1,0 +1,28 @@
+# kubernetes/01b-configmap-helm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config-helm # Nama ConfigMap berbeda
+  namespace: mahasiswa-app
+data:
+  # --- Database Main (dari Helm Chart Bitnami PostgreSQL) ---
+  # Nama service umumnya: <nama-rilis-helm>-postgresql.<namespace>.svc.cluster.local
+  # Ganti 'user', 'password', dan 'mahasiswa_db' jika Anda mengubahnya di values-postgres-main.yaml
+  DATABASE_URL: "postgresql://user:password@postgres-main-postgresql.mahasiswa-app.svc.cluster.local:5432/mahasiswa_db"
+
+  # --- Database Log (dari Helm Chart Bitnami PostgreSQL) ---
+  # Nama service umumnya: <nama-rilis-helm>-postgresql.<namespace>.svc.cluster.local
+  # Ganti 'log_user', 'log_password', dan 'log_db' jika Anda mengubahnya di values-postgres-log.yaml
+  LOG_DATABASE_URL: "postgresql://log_user:log_password@postgres-log-postgresql.mahasiswa-app.svc.cluster.local:5432/log_db"
+
+  # --- Kafka (dari Helm Chart Bitnami Kafka) ---
+  # Nama service headless umumnya: <nama-rilis-helm>-headless.<namespace>.svc.cluster.local
+  # Atau service biasa: <nama-rilis-helm>.<namespace>.svc.cluster.local
+  # Port default Kafka adalah 9092
+  KAFKA_BROKERS: "kafka-headless.mahasiswa-app.svc.cluster.local:9092"
+
+  # --- Konfigurasi Lainnya (tetap sama) ---
+  KAFKA_TOPIC: "mahasiswa_events"
+  API_PORT: "3000" # Port internal container REST API
+  CONSUMER_GROUP_ID: "log_processors_group_k8s"
+  KAFKA_CONSUME_FROM_BEGINNING: "true"

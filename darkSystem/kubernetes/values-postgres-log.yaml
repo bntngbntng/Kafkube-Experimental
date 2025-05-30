@@ -1,0 +1,11 @@
+# values-postgres-log.yaml
+global:
+  postgresql:
+    auth:
+      postgresPassword: "log_password" # Ganti dengan password aman
+      username: "log_user"
+      database: "log_db"
+primary:
+  persistence:
+    enabled: true
+    size: 1Gi # Sesuaikan ukuran penyimpanan

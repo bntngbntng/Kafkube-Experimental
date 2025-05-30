@@ -60,7 +60,7 @@ There are two deployment methods:
     docker push <YOUR_DOCKER_REGISTRY_USERNAME>/rest-api-mahasiswa:latest
     cd ..
 
-    # Untuk Consumer Service
+    # For Consumer Service
     cd consumer-service/
     docker build -t <YOUR_DOCKER_REGISTRY_USERNAME>/consumer-service:latest .
     docker push <YOUR_DOCKER_REGISTRY_USERNAME>/consumer-service:latest
@@ -133,7 +133,7 @@ This method is now using files that located in `kubernetes/` for every component
 
 This method is now using the Helm Chart for PostgreSQL dan Kafka, would be more robust and efficient.
 
-1.  **Install Helm CLI** (if not already. You can also move into /kubernetes directory and find get-helm.sh, then chmod' it already).
+1.  **Install Helm CLI** (if not already. You can also move into darkSystem/ directory and find get-helm.sh, then chmod' it already).
 
 2.  **Create Namespace:** (if not to be created):
     ```bash
@@ -173,23 +173,27 @@ This method is now using the Helm Chart for PostgreSQL dan Kafka, would be more 
     Until all the Pods from Helm (PostgreSQL, Zookeeper, Kafka) are `Running` and `READY`.
 
 7.  **Update ConfigMap:**
-    After Helm deployed, update kubernetes/01-configmap.yaml with correct service names and apply:
     * Check the PostgreSQL service: `kubectl get svc -n mahasiswa-app -l app.kubernetes.io/instance=postgres-main` (usually `<release-name>-postgresql`, for example `postgres-main-postgresql`).
     * Check the Kafka service: `kubectl get svc -n mahasiswa-app -l app.kubernetes.io/instance=kafka` (usually `<release-name>-headless` or `<release-name>`, for example `kafka-headless`).
     Edit this file `kubernetes/01-configmap.yaml` to adjust the `DATABASE_URL`, `LOG_DATABASE_URL`, the `KAFKA_BROKERS` with *service* name from Helm properly.
     And, apply ConfigMap:
+
     ```bash
-    kubectl apply -f kubernetes/01-configmap.yaml -n mahasiswa-app
+     kubectl apply -f kubernetes/01b-configmap-helm.yaml -n mahasiswa-app
     ```
 
 8.  **Deploy REST API dan Consumer Service (menggunakan YAML manual):**
-    Well, you can use previous .yaml-08 till 10 for this.
+    Make sure you change the repository like before or leave it default with my repository.
     ```bash
-    kubectl apply -f kubernetes/08-rest-api-deployment.yaml -n mahasiswa-app
-    kubectl apply -f kubernetes/09-rest-api-service.yaml -n mahasiswa-app
-    kubectl apply -f kubernetes/10-consumer-service-deployment.yaml -n mahasiswa-app
+    kubectl apply -f kubernetes/08b-rest-api-deployment-helm.yaml -n mahasiswa-app
+    kubectl apply -f kubernetes/09b-rest-api-service-helm.yaml -n mahasiswa-app
+    kubectl apply -f kubernetes/10b-consumer-service-deployment-helm.yaml -n mahasiswa-app
     ```
-
+    If the Pod API or Consumer is already running from a previous deployment and you only update the ConfigMap, you may need to restart the Pod so that it picks up the new configuration.
+    ```bash
+    kubectl rollout restart deployment rest-api-mahasiswa-helm -n mahasiswa-app # Adjust the name 08b
+    kubectl rollout restart deployment consumer-service-helm -n mahasiswa-app    # Adjust the name to 09b
+    ```
 ---
 ## Accessing the Application
 
@@ -207,7 +211,7 @@ After *deployment* is done, You can freely access the REST API.
     ```bash
     kubectl port-forward svc/rest-api-mahasiswa-service -n mahasiswa-app 8080:80
     ```
-    # Access at http://localhost:8080
+    ## Access at http://localhost:8080
 
 ---
 ## Testing Scenarios
@@ -298,10 +302,10 @@ helm uninstall postgres-log -n mahasiswa-app
 helm uninstall kafka -n mahasiswa-app
 
 # Delete application resources that were deployed manually.
-kubectl delete -f kubernetes/10-consumer-service-deployment.yaml -n mahasiswa-app
-kubectl delete -f kubernetes/09-rest-api-service.yaml -n mahasiswa-app
-kubectl delete -f kubernetes/08-rest-api-deployment.yaml -n mahasiswa-app
-kubectl delete -f kubernetes/01-configmap.yaml -n mahasiswa-app # Jika tidak terhapus otomatis atau ingin bersih
+kubectl delete -f kubernetes/10b-consumer-service-deployment-helm.yaml -n mahasiswa-app
+kubectl delete -f kubernetes/09b-rest-api-service-helm.yaml -n mahasiswa-app
+kubectl delete -f kubernetes/08b-rest-api-deployment-helm.yaml -n mahasiswa-app
+kubectl delete -f kubernetes/01b-configmap-helm.yaml -n mahasiswa-app
 
 # Delete PVCs (Helm may not automatically delete PVCs depending on the chart configuration)
 kubectl delete pvc postgres-main-postgresql-0 -n mahasiswa-app  # PVC name may vary, check with `kubectl get pvc -n mahasiswa-app`

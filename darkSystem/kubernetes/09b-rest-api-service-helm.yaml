@@ -1,0 +1,15 @@
+# kubernetes/09b-rest-api-service-helm.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: rest-api-mahasiswa-service-helm # Nama Service bisa dibuat berbeda
+  namespace: mahasiswa-app
+spec:
+  selector:
+    app: rest-api # Selector ini harus cocok dengan label Pod dari 08b-rest-api-deployment-helm.yaml
+    # deployment-method: helm-backend # Jika Anda menambahkan label ini di Pod
+  ports:
+  - protocol: TCP
+    port: 80 # Port yang diexpose oleh Service
+    targetPort: 3000 # Port container (sesuai API_PORT di ConfigMap dan containerPort di Deployment)
+  type: LoadBalancer # Atau NodePort

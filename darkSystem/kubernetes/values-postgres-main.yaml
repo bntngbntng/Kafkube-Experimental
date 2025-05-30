@@ -1,0 +1,13 @@
+# values-postgres-main.yaml
+global:
+  postgresql:
+    auth:
+      postgresPassword: "password" # Ganti dengan password aman
+      username: "user"
+      database: "mahasiswa_db"
+primary:
+  persistence:
+    enabled: true
+    size: 2Gi # Sesuaikan ukuran penyimpanan
+# service: # Jika perlu kustomisasi service
+#   port: 5432

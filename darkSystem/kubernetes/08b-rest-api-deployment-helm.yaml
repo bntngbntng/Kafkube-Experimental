@@ -1,0 +1,61 @@
+# kubernetes/08b-rest-api-deployment-helm.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-api-mahasiswa-helm # Bisa diberi nama berbeda jika ingin menjalankan kedua versi deployment
+  namespace: mahasiswa-app
+  labels:
+    app: rest-api # Label ini bisa tetap sama, atau diubah jika ingin service berbeda menargetkannya
+    # deployment-method: helm-backend # Contoh label tambahan
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rest-api # Harus cocok dengan labels di template.metadata.labels
+  template:
+    metadata:
+      labels:
+        app: rest-api # Label Pod, digunakan oleh Service untuk menemukan Pod ini
+        # deployment-method: helm-backend
+    spec:
+      containers:
+      - name: rest-api-container
+        image: pppercivalll/rest-api-mahasiswa:latest # GANTI INI!
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000 # Akan diambil dari ConfigMap API_PORT
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config-helm # Menggunakan ConfigMap khusus Helm
+              key: API_PORT
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config-helm # Menggunakan ConfigMap khusus Helm
+              key: DATABASE_URL
+        - name: KAFKA_BROKERS
+          valueFrom:
+            configMapKeyRef:
+              name: app-config-helm # Menggunakan ConfigMap khusus Helm
+              key: KAFKA_BROKERS
+        - name: KAFKA_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: app-config-helm # Menggunakan ConfigMap khusus Helm
+              key: KAFKA_TOPIC
+        - name: KAFKA_CLIENT_ID
+          value: "mahasiswa-api-producer-k8s-helm" # Client ID bisa sedikit berbeda
+        livenessProbe:
+          httpGet:
+            path: / # Asumsi root path mengembalikan 200 OK untuk API yang sehat
+            port: 3000 # Port dari API_PORT
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000 # Port dari API_PORT
+          initialDelaySeconds: 5
+          periodSeconds: 10
