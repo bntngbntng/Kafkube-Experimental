@@ -27,7 +27,7 @@ Ensure the following software is installed:
 
 ---
 ## Project Structure
-![Structural Poverty](src/screenshots/Structure.png)
+![Structural Poverty](src/Structure.png)
 ---
 ## Local Development with Docker Compose
 
