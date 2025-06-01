@@ -100,6 +100,15 @@ services:
       KAFKA_CONSUMER_GROUP: log_processors_group_compose
       KAFKA_CONSUME_FROM_BEGINNING: "true"
 
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend_mahasiswa
+    ports:
+      - "8080:80"   
+    depends_on:
+      - rest_api     
+
 volumes:
   postgres_main_data:
   postgres_log_data:
