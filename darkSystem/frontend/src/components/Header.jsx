@@ -86,7 +86,7 @@ const Header = () => {
           >
             <span className="gradient-text">Sistem Manajemen</span>
             <br />
-            <span className="text-white"><strike>Mas Anies</strike> Mahasiswa</span>
+            <span className="text-white">Mahasiswa</span>
           </h1>
 
           {/* Subtitle */}
