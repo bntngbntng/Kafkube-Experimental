@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: sister534/frontend-mahasiswa:latest    
+        image: sister534/frontend-baru:latest    
         imagePullPolicy: IfNotPresent                 
         ports:
         - containerPort: 80
