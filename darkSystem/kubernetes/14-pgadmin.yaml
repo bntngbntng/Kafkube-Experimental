@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgadmin-secret
+  namespace: mahasiswa-app
+type: Opaque
+data:
+  PGADMIN_DEFAULT_EMAIL: cGdhZG1pbjRAdGVzdC5jb20=  # base64("pgadmin4@test.com")
+  PGADMIN_DEFAULT_PASSWORD: YWRtaW4xMjM=          # base64("admin123")
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin
+  namespace: mahasiswa-app
+spec:
+  selector:
+    app: pgadmin
+  ports:
+    - protocol: TCP
+      port: 80       
+      targetPort: 80
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  namespace: mahasiswa-app
+  labels:
+    app: pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-secret
+                  key: PGADMIN_DEFAULT_EMAIL
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-secret
+                  key: PGADMIN_DEFAULT_PASSWORD
+          ports:
+            - containerPort: 80
