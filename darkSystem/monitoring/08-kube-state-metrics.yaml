@@ -29,8 +29,8 @@ metadata:
 spec:
   selector:
     app: kube-state-metrics
-  type: ClusterIP
   ports:
-  - protocol: TCP
-    port: 8080
-    targetPort: 8080
+    - name: http-metrics        
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
