@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: kube-state-metrics
   namespace: monitoring
+  labels:
+    app: kube-state-metrics
 spec:
   selector:
     matchLabels:
@@ -16,21 +18,57 @@ spec:
       serviceAccountName: prometheus
       containers:
       - name: kube-state-metrics
-        image: quay.io/coreos/kube-state-metrics:v2.6.0
+        image: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1
         ports:
         - containerPort: 8080
-          name: monitoring
+          name: http-metrics
+        - containerPort: 8081
+          name: telemetry
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8081
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "10m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65534
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: kube-state-metrics
   namespace: monitoring
+  labels:
+    app: kube-state-metrics
 spec:
   selector:
     app: kube-state-metrics
   type: ClusterIP
   ports:
-  - protocol: TCP
+  - name: http-metrics
     port: 8080
-    targetPort: 8080
+    targetPort: http-metrics
+    protocol: TCP
+  - name: telemetry  
+    port: 8081
+    targetPort: telemetry
+    protocol: TCP
