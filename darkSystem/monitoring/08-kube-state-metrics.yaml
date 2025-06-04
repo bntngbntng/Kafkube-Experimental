@@ -1,8 +1,8 @@
----
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kube-state-metrics
+  namespace: monitoring
 spec:
   selector:
     matchLabels:
@@ -16,19 +16,20 @@ spec:
       serviceAccountName: prometheus
       containers:
       - name: kube-state-metrics
-        image: quay.io/coreos/kube-state-metrics:v1.9.8
+        image: quay.io/coreos/kube-state-metrics:v2.6.0
         ports:
         - containerPort: 8080
           name: monitoring
 ---
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: kube-state-metrics
+  namespace: monitoring
 spec:
   selector:
     app: kube-state-metrics
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - protocol: TCP
     port: 8080
