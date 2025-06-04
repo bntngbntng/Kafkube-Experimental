@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: monitoring
+  labels:
+    app: node-exporter
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+    spec:
+      serviceAccountName: prometheus      
+      containers:
+        - name: node-exporter
+          image: quay.io/prometheus/node-exporter:v1.7.0
+          ports:
+            - containerPort: 9100
+              name: metrics
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          # Mount host filesystem untuk dapat metrik disk dan lainnya
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+          args:
+            - '--path.procfs=/host/proc'
+            - '--path.sysfs=/host/sys'
+            - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($|/)"'
+            - '--collector.netdev.device-exclude=^lo$'
+      hostNetwork: true
+      hostPID: true
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
