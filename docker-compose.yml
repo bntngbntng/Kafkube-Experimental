@@ -69,8 +69,8 @@ services:
       retries: 5
 
   rest_api:
-    build: ./rest-api-mahasiswa
-    container_name: rest_api_mahasiswa
+    build: ./api-service
+    container_name: api-service
     ports:
       - "3000:3000"
     depends_on:
@@ -102,12 +102,14 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./frontend/mahasiswa-app-frontend
     container_name: frontend_mahasiswa
     ports:
       - "8080:80"   
+    volumes: # override reverse proksi punya k8s, api devlopment kita pakek port 3000
+      - ./frontend/mahasiswa-app-frontend/nginx-local.conf:/etc/nginx/conf.d/nginx.conf:ro
     depends_on:
-      - rest_api     
+      - rest_api
 
 volumes:
   postgres_main_data:
