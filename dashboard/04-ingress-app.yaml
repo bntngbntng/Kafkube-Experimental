@@ -7,13 +7,13 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   rules:
-    - host: sister.osslab.my.id  
+    - host: kelompok3.osslab.my.id  
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: frontend-service
+                name: dashboard-service
                 port:
                   number: 80
