@@ -1,0 +1,8 @@
+# configmap‐app.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard‐config
+  namespace: dashboard
+data:
+  PROM_URL: "http://prometheus-service.monitoring.svc.cluster.local:9090/api/v1/query?query="

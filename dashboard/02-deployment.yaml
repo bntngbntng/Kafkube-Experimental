@@ -1,0 +1,42 @@
+# deployment‐app.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard‐deployment
+  namespace: dashboard
+  labels:
+    app: dashboard-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-frontend
+  template:
+    metadata:
+      labels:
+        app: dashboard-frontend
+    spec:
+      containers:
+        - name: dashboard-frontend
+          image: sister534/landingpage:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PROM_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: dashboard-config
+                  key: PROM_URL
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
