@@ -1,0 +1,14 @@
+# kubernetes/09b-rest-api-service-helm.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: rest-api-mahasiswa-service-helm 
+  namespace: mahasiswa-app
+spec:
+  selector:
+    app: rest-api 
+  ports:
+  - protocol: TCP
+    port: 80 
+    targetPort: 3000 
+  type: LoadBalancer

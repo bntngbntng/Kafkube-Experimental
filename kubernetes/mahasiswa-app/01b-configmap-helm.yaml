@@ -1,0 +1,14 @@
+# kubernetes/01b-configmap-helm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config-helm
+  namespace: mahasiswa-app
+data:
+  DATABASE_URL: "postgresql://user:password@postgres-main-postgresql.mahasiswa-app.svc.cluster.local:5432/mahasiswa_db"
+  LOG_DATABASE_URL: "postgresql://log_user:log_password@postgres-log-postgresql.mahasiswa-app.svc.cluster.local:5432/log_db"
+  KAFKA_BROKERS: "kafka-headless.mahasiswa-app.svc.cluster.local:9092"
+  KAFKA_TOPIC: "mahasiswa_events"
+  API_PORT: "3000" 
+  CONSUMER_GROUP_ID: "log_processors_group_k8s"
+  KAFKA_CONSUME_FROM_BEGINNING: "true"
