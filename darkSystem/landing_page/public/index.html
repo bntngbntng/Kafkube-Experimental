@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REST API Mahasiswa | Microservices Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#e0f7ff',
+                            100: '#b3e9ff',
+                            200: '#80dcff',
+                            300: '#4dceff',
+                            400: '#26c4ff',
+                            500: '#00b9ff',
+                            600: '#00a2e0',
+                            700: '#0085b3',
+                            800: '#006880',
+                            900: '#004d66',
+                        },
+                        dark: {
+                            900: '#0c121c',
+                            800: '#141a24',
+                            700: '#1d232d',
+                        },
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0c121c 0%, #141a24 100%);
+            color: #e0e0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .tech-grid {
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(0, 185, 255, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 80% 80%, rgba(64, 224, 208, 0.1) 0%, transparent 20%);
+        }
+
+        .grid-pattern {
+            background:
+                linear-gradient(rgba(20, 26, 36, 0.9), rgba(20, 26, 36, 0.9)),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300b9ff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .service-card {
+            background: linear-gradient(145deg, rgba(29, 35, 45, 0.8), rgba(20, 26, 36, 0.8));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 185, 255, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 185, 255, 0.2), 0 5px 10px -5px rgba(0, 185, 255, 0.1);
+            border-color: rgba(0, 185, 255, 0.3);
+        }
+
+        .status-indicator.online {
+            box-shadow: 0 0 0 0 rgba(0, 185, 255, 1);
+            animation: pulse-slow 2s infinite;
+        }
+
+        .scroll-offset {
+            scroll-margin-top: 96px;
+        }
+
+        .blob {
+            filter: blur(40px);
+            opacity: 0.25;
+            animation: float 12s infinite ease-in-out;
+        }
+
+        .blob-1 {
+            background: linear-gradient(120deg, #00b9ff, #40e0d0);
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            background: linear-gradient(120deg, #9d4edd, #ff6d00);
+            animation-delay: -4s;
+        }
+
+        .blob-3 {
+            background: linear-gradient(120deg, #ff4d94, #ff9a00);
+            animation-delay: -8s;
+        }
+
+        .glow-text {
+            text-shadow: 0 0 12px rgba(0, 185, 255, 0.7);
+        }
+
+        .team-card {
+            background: linear-gradient(145deg, rgba(29, 35, 45, 0.8), rgba(20, 26, 36, 0.9));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 185, 255, 0.4);
+            box-shadow: 0 8px 20px -5px rgba(0, 185, 255, 0.25);
+        }
+
+        .team-photo {
+            border: 2px solid rgba(0, 185, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover .team-photo {
+            border-color: rgba(0, 185, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .tech-badge {
+            transition: all 0.3s ease;
+        }
+
+        .tech-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .api-method {
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            text-align: center;
+            width: 5rem;
+        }
+
+        .api-method.get {
+            background-color: rgba(0, 185, 255, 0.2);
+            color: #00b9ff;
+        }
+
+        .api-method.post {
+            background-color: rgba(74, 222, 128, 0.2);
+            color: #4ADE80;
+        }
+
+        .api-method.put {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+        }
+
+        .api-method.delete {
+            background-color: rgba(248, 113, 113, 0.2);
+            color: #F87171;
+        }
+
+        .kafka-message {
+            animation: fadeIn 0.3s ease-in;
+            background: rgba(20, 26, 36, 0.6);
+        }
+
+        .schema-table th {
+            background: rgba(20, 26, 36, 0.8);
+        }
+
+        .metric-card {
+            transition: all 0.3s ease;
+            background: rgba(29, 35, 45, 0.8);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px -3px rgba(0, 185, 255, 0.2);
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(50px, -50px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-50px, 30px) scale(0.9);
+            }
+        }
+
+        @keyframes pulse-slow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 185, 255, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(0, 185, 255, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 185, 255, 0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px -3px rgba(0, 185, 255, 0.2);
+        }
+
+        .diagram-container {
+            position: relative;
+            overflow: hidden;
+            height: 500px;
+            background: rgba(20, 26, 36, 0.5);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(0, 185, 255, 0.15);
+        }
+
+        .architecture-node {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(29, 35, 45, 0.9);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 185, 255, 0.25);
+            min-width: 120px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .architecture-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 185, 255, 0.1), 0 4px 6px -2px rgba(0, 185, 255, 0.05);
+            border-color: rgba(0, 185, 255, 0.5);
+            z-index: 10;
+        }
+
+        .node-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #00b9ff;
+        }
+
+        .connection-line {
+            position: absolute;
+            background: linear-gradient(to right, rgba(0, 185, 255, 0.7), rgba(0, 185, 255, 0.7));
+            transform-origin: 0 0;
+            height: 2px;
+            z-index: 1;
+        }
+
+        .connection-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #00b9ff;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .tabs button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tabs button.active {
+            background: rgba(29, 35, 45, 0.8);
+            color: #00b9ff;
+            border-bottom: 2px solid #00b9ff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Perbaikan header */
+        .nav-link {
+            position: relative;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00b9ff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .logo {
+            background: linear-gradient(45deg, #00b9ff, #00d2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* Perbaikan diagram arsitektur */
+        .diagram-line {
+            position: absolute;
+            background: linear-gradient(to right, rgba(0, 185, 255, 0.5), rgba(0, 185, 255, 0.5));
+            height: 2px;
+            transform-origin: 0 0;
+        }
+
+        .diagram-line::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00b9ff;
+            top: -3px;
+            right: -4px;
+        }
+
+        /* Animasi tambahan */
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px rgba(0, 185, 255, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(0, 185, 255, 0.8);
+            }
+
+            100% {
+                box-shadow: 0 0 5px rgba(0, 185, 255, 0.5);
+            }
+        }
+
+        .glow-box {
+            animation: glow 3s infinite ease-in-out;
+        }
+
+        /* Perbaikan animasi floating */
+        .floating {
+            animation: floatAnimation 6s infinite ease-in-out;
+        }
+
+        @keyframes floatAnimation {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="relative overflow-x-hidden">
+    <!-- Background elements -->
+    <div class="fixed inset-0 overflow-hidden grid-pattern z-0"></div>
+    <div class="fixed w-full h-full inset-0 z-0 overflow-hidden">
+        <div class="blob blob-1 absolute w-96 h-96 rounded-full top-1/4 left-1/4"></div>
+        <div class="blob blob-2 absolute w-80 h-80 rounded-full top-1/3 right-1/4"></div>
+        <div class="blob blob-3 absolute w-72 h-72 rounded-full bottom-1/4 left-1/3"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-dark-900/90 backdrop-blur-md border-b border-gray-800 py-3">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-server text-primary-400 text-xl mr-2"></i>
+                        <span class="text-white text-xl font-bold logo">Kafkube</span>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-8">
+                        <a href="#architecture" class="nav-link text-gray-300 hover:text-white transition-colors">
+                            <i class="fas fa-diagram-project mr-2"></i>Diagram
+                        </a>
+                        <a href="#api" class="nav-link text-gray-300 hover:text-white transition-colors">
+                            <i class="fas fa-code mr-2"></i>API Docs
+                        </a>
+                        <a href="#kafka" class="nav-link text-gray-300 hover:text-white transition-colors">
+                            <i class="fas fa-stream mr-2"></i>Kafka Stream
+                        </a>
+                        <a href="#schema" class="nav-link text-gray-300 hover:text-white transition-colors">
+                            <i class="fas fa-database mr-2"></i>DB Schema
+                        </a>
+                        <a href="#testing" class="nav-link text-gray-300 hover:text-white transition-colors">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Testing
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <button
+                        class="bg-primary-700 hover:bg-primary-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-rocket mr-2"></i><a href="http://sister.osslab.my.id">Launch Dashboard</a>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12">
+        <!-- Header -->
+        <div class="text-center mt-8 mb-20">
+            <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight text-white mb-6">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-cyan-300">Student
+                    Management
+                </span> System
+            </h1>
+            <p class="text-xl max-w-3xl mx-auto text-gray-300">
+                Microservice Architecture Powered by REST API, Kafka, Docker & Kubernetes
+            </p>
+
+            <div class="mt-10 inline-flex flex-wrap gap-3 justify-center">
+                <span
+                    class="px-3 py-1 bg-primary-900/30 text-primary-300 rounded-full text-sm font-medium transition-all duration-300 tech-badge">REST
+                    API</span>
+                <span
+                    class="px-3 py-1 bg-pink-900/30 text-pink-300 rounded-full text-sm font-medium transition-all duration-300 tech-badge">Kafka</span>
+                <span
+                    class="px-3 py-1 bg-green-900/30 text-green-300 rounded-full text-sm font-medium transition-all duration-300 tech-badge">Docker</span>
+                <span
+                    class="px-3 py-1 bg-purple-900/30 text-purple-300 rounded-full text-sm font-medium transition-all duration-300 tech-badge">Kubernetes</span>
+                <span
+                    class="px-3 py-1 bg-amber-900/30 text-amber-300 rounded-full text-sm font-medium transition-all duration-300 tech-badge">PostgreSQL</span>
+                <span
+                    class="px-3 py-1 bg-cyan-900/30 text-cyan-300 rounded-full text-sm font-medium transition-all duration-300 tech-badge">Node.js</span>
+            </div>
+        </div>
+
+        <!-- Services Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+            <!-- REST API Mahasiswa -->
+            <div class="service-card rounded-xl p-6 relative overflow-hidden floating">
+                <div class="absolute top-4 right-4 flex items-center">
+                    <span class="relative flex h-3 w-3">
+                        <span
+                            class="status-indicator online animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-primary-500 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-primary-500"></span>
+                    </span>
+                    <span class="ml-2 text-xs text-primary-300">Online</span>
+                </div>
+
+                <div class="flex items-center mb-4">
+                    <div class="flex items-center justify-center w-12 h-12 bg-primary-900/20 rounded-lg">
+                        <lottie-player src="https://lottie.host/cd96b88e-62eb-4d5e-bd93-faabe3e68331/64AGpdF8gF.json"
+                            background="transparent" speed="1" style="width: 32px; height: 32px;" loop
+                            autoplay></lottie-player>
+                    </div>
+                    <h3 class="text-xl font-bold ml-3 text-white">Mahasiswa API</h3>
+                </div>
+
+                <p class="text-gray-300 mb-4">Interact with the student data REST API. Create, read, update, and delete
+                    student records.</p>
+
+                <div class="mt-6">
+                    <a href="#api" class="inline-flex items-center text-primary-400 hover:text-white transition-colors">
+                        <span>Access API</span>
+                        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Kafka UI -->
+            <div class="service-card rounded-xl p-6 relative overflow-hidden floating" style="animation-delay: 0.5s;">
+                <div class="absolute top-4 right-4 flex items-center">
+                    <span class="relative flex h-3 w-3">
+                        <span
+                            class="status-indicator online animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-primary-500 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-primary-500"></span>
+                    </span>
+                    <span class="ml-2 text-xs text-primary-300">Online</span>
+                </div>
+
+                <div class="flex items-center mb-4">
+                    <div class="flex items-center justify-center w-12 h-12 bg-purple-900/20 rounded-lg">
+                        <lottie-player src="https://lottie.host/ed401aba-0017-4fc0-ad03-a2e6fd5c5a18/kCZW7Kn2Sw.json"
+                            background="transparent" speed="1" style="width: 32px; height: 32px;" loop
+                            autoplay></lottie-player>
+                    </div>
+                    <h3 class="text-xl font-bold ml-3 text-white">Kafka UI</h3>
+                </div>
+
+                <p class="text-gray-300 mb-4">Monitor Kafka clusters, topics, and messages. Manage partitions and
+                    consumer groups.</p>
+
+                <div class="mt-6">
+                    <a href="http://k8s-master:30736"
+                        class="inline-flex items-center text-purple-400 hover:text-white transition-colors">
+                        <span>Access Kafka UI</span>
+                        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- pgAdmin -->
+            <div class="service-card rounded-xl p-6 relative overflow-hidden floating" style="animation-delay: 1s;">
+                <div class="absolute top-4 right-4 flex items-center">
+                    <span class="relative flex h-3 w-3">
+                        <span
+                            class="status-indicator online animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <span class="ml-2 text-xs text-green-300">Online</span>
+                </div>
+
+                <div class="flex items-center mb-4">
+                    <div class="flex items-center justify-center w-12 h-12 bg-green-900/20 rounded-lg">
+                        <lottie-player src="https://lottie.host/ba7c06b8-225f-4470-9f16-81624339c9df/ObvRHd0b6w.json"
+                            background="transparent" speed="1" style="width: 32px; height: 32px;" loop
+                            autoplay></lottie-player>
+                    </div>
+                    <h3 class="text-xl font-bold ml-3 text-white">pgAdmin</h3>
+                </div>
+
+                <p class="text-gray-300 mb-4">Manage PostgreSQL databases. Execute queries, monitor performance, and
+                    manage database objects.</p>
+
+                <div class="mt-6">
+                    <a href="http://k8s-master:32711"
+                        class="inline-flex items-center text-green-400 hover:text-white transition-colors">
+                        <span>Access pgAdmin</span>
+                        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kubernetes/Docker Info -->
+        <div class="bg-dark-800/70 border border-gray-800 rounded-xl p-6 md:p-8 mb-24">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-4">Deployment Architecture</h2>
+                    <p class="text-gray-300 mb-4">
+                        The entire system is containerized using Docker and orchestrated with Kubernetes for maximum
+                        scalability and reliability.
+                    </p>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="bg-blue-900/20 border border-blue-800 rounded-lg p-2">
+                            <lottie-player
+                                src="https://lottie.host/472d8656-7c1c-4661-acdb-34feabaa574f/ZN3VNqvZNg.json"
+                                background="transparent" speed="1" style="width: 40px; height: 40px;" loop
+                                autoplay></lottie-player>
+                        </div>
+                        <div class="bg-blue-900/20 border border-blue-800 rounded-lg p-2">
+                            <lottie-player
+                                src="https://lottie.host/4564120f-0992-4132-a203-4bf601dd8f1f/NbKNATLiDV.json"
+                                background="transparent" speed="1" style="width: 40px; height: 40px;" loop
+                                autoplay></lottie-player>
+                        </div>
+                    </div>
+                    <a href="/api/cluster-status" class="text-primary-400 hover:text-primary-300 inline-flex items-center">
+                        View Cluster Dashboard
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                    </a>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-3">System Information</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="stat-card bg-dark-900/50 border border-gray-800 rounded-lg p-4">
+                            <div class="text-primary-400 mb-1 font-medium">Containers</div>
+                            <div id="containers-count" class="text-xl font-bold text-white">0</div>
+                            <div class="text-xs text-gray-500 mt-1">Active pods</div>
+                        </div>
+                        <div class="stat-card bg-dark-900/50 border border-gray-800 rounded-lg p-4">
+                            <div class="text-green-400 mb-1 font-medium">Nodes</div>
+                            <div id="nodes-count" class="text-xl font-bold text-white">0</div>
+                            <div class="text-xs text-gray-500 mt-1">Kubernetes cluster</div>
+                        </div>
+                        <div class="stat-card bg-dark-900/50 border border-gray-800 rounded-lg p-4">
+                            <div class="text-yellow-400 mb-1 font-medium">CPU</div>
+                            <div id="cpu-usage" class="text-xl font-bold text-white">0%</div>
+                            <div class="text-xs text-gray-500 mt-1">Average usage</div>
+                        </div>
+                        <div class="stat-card bg-dark-900/50 border border-gray-800 rounded-lg p-4">
+                            <div class="text-purple-400 mb-1 font-medium">Memory</div>
+                            <div id="memory-usage" class="text-xl font-bold text-white">0/0 GB</div>
+                            <div class="text-xs text-gray-500 mt-1">Total usage</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture Diagram Section -->
+        <div id="architecture" class="bg-dark-800/70 border border-gray-800 rounded-xl p-6 md:p-8 mb-24">
+            <h2 class="text-3xl font-bold text-center text-white mb-12">System Architecture Diagram</h2>
+
+            <div class="diagram-container">
+                <div class="architecture-node" style="top: 15%; left: 50%; transform: translateX(-50%);">
+                    <div class="node-icon"><i class="fas fa-stream"></i></div>
+                    <div class="font-bold text-white text-sm mb-1">Kafka</div>
+                    <div class="text-gray-400 text-xs">Event Streaming</div>
+                </div>
+
+                <div class="architecture-node" style="top: 40%; left: 20%;">
+                    <div class="node-icon"><i class="fas fa-server"></i></div>
+                    <div class="font-bold text-white text-sm mb-1">API Gateway</div>
+                    <div class="text-gray-400 text-xs">Nginx, Express</div>
+                </div>
+
+                <div class="architecture-node" style="top: 40%; left: 50%; transform: translateX(-50%);">
+                    <div class="node-icon"><i class="fas fa-user-graduate"></i></div>
+                    <div class="font-bold text-white text-sm mb-1">Mahasiswa API</div>
+                    <div class="text-gray-400 text-xs">Node.js</div>
+                </div>
+
+                <div class="architecture-node" style="top: 40%; right: 20%;">
+                    <div class="node-icon"><i class="fas fa-server"></i></div>
+                    <div class="font-bold text-white text-sm mb-1">Consumer Service</div>
+                    <div class="text-gray-400 text-xs">Express</div>
+                </div>
+
+                <div class="architecture-node" style="top: 70%; left: 15%;">
+                    <div class="node-icon"><i class="fas fa-globe"></i></div>
+                    <div class="font-bold text-white text-sm mb-1">Client</div>
+                    <div class="text-gray-400 text-xs">Web/Mobile</div>
+                </div>
+
+                <div class="architecture-node" style="top: 70%; right: 43.5%;">
+                        <div class="node-icon"><i class="fas fa-database"></i></div>
+                        <div class="font-bold text-white text-sm mb-1">PostgreSQL Main</div>
+                        <div class="text-gray-400 text-xs">Database</div>
+                </div>
+
+                <div class="architecture-node" style="top: 70%; right: 15%;">
+                    <div class="node-icon"><i class="fas fa-database"></i></div>
+                    <div class="font-bold text-white text-sm mb-1">PostgreSQL Log</div>
+                    <div class="text-gray-400 text-xs">Database</div>
+                </div>
+
+                <!-- Connection lines -->
+                <div class="diagram-line" style="top: 25%; left: 50%; width: 100px; transform: rotate(90deg);"></div>
+                <div class="diagram-line" style="top: 40%; left: 30%; width: 160px; transform: rotate(0deg);"></div>
+                <div class="diagram-line" style="top: 40%; left: 50%; width: 160px; transform: rotate(0deg);"></div>
+                <div class="diagram-line" style="top: 40%; right: 30%; width: 160px; transform: rotate(0deg);"></div>
+                <div class="diagram-line" style="top: 55%; left: 20%; width: 90px; transform: rotate(90deg);"></div>
+                <div class="diagram-line" style="top: 55%; left: 50%; width: 90px; transform: rotate(90deg);"></div>
+                <div class="diagram-line" style="top: 55%; right: 20%; width: 90px; transform: rotate(90deg);"></div>
+            </div>
+
+            <div class="mt-8 text-center text-gray-400 text-sm max-w-3xl mx-auto">
+                The architecture follows microservices principles with an API Gateway as the single entry point.
+                Each service has its own responsibility and communicates via Kafka for event-driven workflows.
+            </div>
+        </div>
+
+        <!-- API Documentation Section -->
+        <div id="api" class="bg-dark-800/70 border border-gray-800 rounded-xl p-6 md:p-8 mb-24">
+            <h2 class="text-3xl font-bold text-center text-white mb-12">API Documentation</h2>
+
+            <div class="bg-dark-900 rounded-xl border border-gray-800 overflow-hidden">
+                <div class="tabs flex border-b border-gray-800">
+                    <button class="active" data-tab="mahasiswa">Mahasiswa Endpoints</button>
+                </div>
+
+                <div class="tab-content active" id="mahasiswa">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-700">
+                            <thead>
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 bg-gray-900 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                        Method</th>
+                                    <th
+                                        class="px-6 py-3 bg-gray-900 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                        Endpoint</th>
+                                    <th
+                                        class="px-6 py-3 bg-gray-900 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                        Description</th>
+                                    <th
+                                        class="px-6 py-3 bg-gray-900 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                        Authentication</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-dark-800 divide-y divide-gray-700">
+                                <tr class="hover:bg-dark-700">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="api-method get">GET</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                                        /api/mahasiswa
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-400">
+                                        Retrieve all students 
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                                        <span
+                                            class="px-2 py-1 bg-primary-900/30 text-primary-300 rounded-full text-xs">Development</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-dark-700">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="api-method post">POST</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                                        /api/mahasiswa
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-400">
+                                        Create a new student record with data in JSON format
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                                        <span
+                                            class="px-2 py-1 bg-yellow-900/30 text-yellow-300 rounded-full text-xs">Development</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-6 bg-dark-900 border-t border-gray-800">
+                        <h3 class="text-lg font-bold text-white mb-3">API URL http://sister.osslab.my.id/api/mahasiswa -> Example Request</h3>
+                        <pre class="bg-dark-700 p-4 rounded-lg text-sm text-gray-300 overflow-x-auto">
+<code class="language-javascript">
+{
+    "nim": "242360000",
+    "nama": "Kube Netes",
+    "jurusan": "Teknik Rekayasa Internet"
+}
+</code>
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kafka Messages Section -->
+        <div id="kafka" class="bg-dark-800/70 border border-gray-800 rounded-xl p-6 md:p-8 mb-24">
+            <h2 class="text-3xl font-bold text-center text-white mb-12">Real-time Kafka Stream</h2>
+
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="relative flex h-3 w-3 mr-2 inline-block">
+                        <span
+                            class="status-indicator online animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <span class="text-green-400 text-sm">Active: Streaming 15 messages per second</span>
+                </div>
+                <div>
+                    <button id="pauseStream"
+                        class="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded hover:bg-gray-700">Pause</button>
+                    <button id="resumeStream"
+                        class="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded hover:bg-gray-700 ml-2 hidden">Resume</button>
+                </div>
+            </div>
+
+            <div class="kafka-stream bg-dark-900 border border-gray-800 rounded-xl p-4 h-96 overflow-y-auto">
+                <div class="kafka-message mb-3 p-4 rounded-lg flex">
+                    <div class="mr-3">
+                        <div class="w-8 h-8 rounded-full bg-primary-900/30 flex items-center justify-center">
+                            <i class="fas fa-server text-primary-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <span class="text-sm font-medium text-primary-300">new-student</span>
+                            <span class="text-xs text-gray-500">Just now</span>
+                        </div>
+                        <div class="mt-1 text-sm text-gray-300">
+                            Created student: John Doe (NIM: 200210001)
+                        </div>
+                        <pre class="mt-2 p-2 bg-dark-800 text-xs text-gray-400 rounded overflow-x-auto">
+{ 
+  "nim": "200210001", 
+  "nama": "John Doe", 
+  "email": "john.doe@student.ac.id", 
+  "eventId": "evt-987654321" 
+}</pre>
+                    </div>
+                </div>
+
+                <div class="kafka-message mb-3 p-4 rounded-lg flex">
+                    <div class="mr-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-900/30 flex items-center justify-center">
+                            <i class="fas fa-user-graduate text-purple-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <span class="text-sm font-medium text-primary-300">enrollment</span>
+                            <span class="text-xs text-gray-500">2 seconds ago</span>
+                        </div>
+                        <div class="mt-1 text-sm text-gray-300">
+                            Student enrolled in course: Data Structures (Code: CSI2001)
+                        </div>
+                        <pre class="mt-2 p-2 bg-dark-800 text-xs text-gray-400 rounded overflow-x-auto">
+{ 
+  "studentId": 101, 
+  "courseId": 2034, 
+  "semester": "2023-2", 
+  "timestamp": "2023-09-15T10:30:45Z" 
+}</pre>
+                    </div>
+                </div>
+
+                <div class="kafka-message mb-3 p-4 rounded-lg flex">
+                    <div class="mr-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-900/30 flex items-center justify-center">
+                            <i class="fas fa-sync text-blue-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <span class="text-sm font-medium text-primary-300">student-update</span>
+                            <span class="text-xs text-gray-500">5 seconds ago</span>
+                        </div>
+                        <div class="mt-1 text-sm text-gray-300">
+                            Updated student profile: Jane Smith (NIM: 200210002)
+                        </div>
+                        <pre class="mt-2 p-2 bg-dark-800 text-xs text-gray-400 rounded overflow-x-auto">
+{ 
+  "nim": "200210002", 
+  "field": "email", 
+  "oldValue": "jane@old-email.com", 
+  "newValue": "jane.smith@student.ac.id" 
+}</pre>
+                    </div>
+                </div>
+
+                <div class="kafka-message mb-3 p-4 rounded-lg flex">
+                    <div class="mr-3">
+                        <div class="w-8 h-8 rounded-full bg-red-900/30 flex items-center justify-center">
+                            <i class="fas fa-user-minus text-red-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <span class="text-sm font-medium text-primary-300">student-deletion</span>
+                            <span class="text-xs text-gray-500">12 seconds ago</span>
+                        </div>
+                        <div class="mt-1 text-sm text-gray-300">
+                            Student record deleted: Robert Johnson (NIM: 200110045)
+                        </div>
+                        <pre class="mt-2 p-2 bg-dark-800 text-xs text-gray-400 rounded overflow-x-auto">
+{ 
+  "nim": "200110045", 
+  "deletionReason": "Graduation", 
+  "timestamp": "2023-09-15T10:25:30Z" 
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Schema Section -->
+        <div id="schema" class="bg-dark-800/70 border border-gray-800 rounded-xl p-6 md:p-8 mb-24">
+            <h2 class="text-3xl font-bold text-center text-white mb-12">Database Schema</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-dark-900 border border-gray-800 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-white mb-4">Mahasiswa Table Schema</h3>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full schema-table">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Column
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Type
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">
+                                        Constraints</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-800">
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-200">nim</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">VARCHAR(10)</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">PRIMARY KEY</td>
+                                </tr>
+                                <tr class="border-b border-gray-800">
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-200">nama</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">VARCHAR(100)</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">NOT NULL</td>
+                                </tr>
+                                <tr class="border-b border-gray-800">
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-200">jurusan
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">VARCHAR(50)</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">NOT NULL</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-200">
+                                        created_timestamp</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">TIMESTAMP</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">DEFAULT
+                                        CURRENT_TIMESTAMP</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-dark-900 border border-gray-800 rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-white mb-4">Example Data</h3>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-800">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">NIM</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Nama
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Jurusan
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800">
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-300">200210001</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">John Doe</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">Teknik Informatika</td>
+                                    
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-300">200210002</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">Jane Smith</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">Telkom</td>
+                               
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-300">200110045</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">Robert Johnson</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">Teknik Elektro</td>
+       
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-300">200310033</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">Emily Chen</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">MMB</td>
+           
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-300">200120077</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">Ahmad Fauzi</td>
+                                    <td class="px-4 py-3 text-sm text-gray-300">GT</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-6 text-sm text-gray-400">
+                        The mahasiswa table stores all student records. The nim (student ID) is the primary key with
+                        format YYYYJJNNN, where:
+                        <ul class="list-disc pl-5 mt-2">
+                            <li>YYYY: Year of enrollment</li>
+                            <li>JJ: Department code</li>
+                            <li>NNN: Sequential number</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing Dashboard Section -->
+        <!-- <div id="testing" class="bg-dark-800/70 border border-gray-800 rounded-xl p-6 md:p-8 mb-24">
+            <h2 class="text-3xl font-bold text-center text-white mb-12">Testing Dashboard</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="metric-card rounded-xl p-6 border border-gray-800">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-sm text-gray-400 mb-1">Response Time</div>
+                            <div class="text-2xl font-bold text-white">127 ms</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-green-900/30 flex items-center justify-center">
+                            <i class="fas fa-bolt text-green-400"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-2 bg-green-500" style="width: 92%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2">Target: &lt;200 ms</div>
+                    </div>
+                </div>
+
+                <div class="metric-card rounded-xl p-6 border border-gray-800">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-sm text-gray-400 mb-1">Throughput</div>
+                            <div class="text-2xl font-bold text-white">1,245 RPM</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-blue-900/30 flex items-center justify-center">
+                            <i class="fas fa-tachometer-alt text-blue-400"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-2 bg-blue-500" style="width: 84%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2">Target: &gt;1,000 RPM</div>
+                    </div>
+                </div>
+
+                <div class="metric-card rounded-xl p-6 border border-gray-800">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-sm text-gray-400 mb-1">Error Rate</div>
+                            <div class="text-2xl font-bold text-white">0.3%</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-yellow-900/30 flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-2 bg-yellow-500" style="width: 6%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2">Target: &lt;1%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="metric-card rounded-xl p-6 border border-gray-800">
+                    <h3 class="text-lg font-bold text-white mb-4">Load Testing Results</h3>
+
+                    <div class="flex justify-between mb-3">
+                        <span class="text-sm text-gray-400">50 Users</span>
+                        <span class="text-sm text-gray-400">92% Success</span>
+                    </div>
+                    <div class="h-2 bg-gray-800 rounded-full mb-4">
+                        <div class="h-2 bg-green-500" style="width: 92%"></div>
+                    </div>
+
+                    <div class="flex justify-between mb-3">
+                        <span class="text-sm text-gray-400">100 Users</span>
+                        <span class="text-sm text-gray-400">85% Success</span>
+                    </div>
+                    <div class="h-2 bg-gray-800 rounded-full mb-4">
+                        <div class="h-2 bg-blue-500" style="width: 85%"></div>
+                    </div>
+
+                    <div class="flex justify-between mb-3">
+                        <span class="text-sm text-gray-400">200 Users</span>
+                        <span class="text-sm text-gray-400">76% Success</span>
+                    </div>
+                    <div class="h-2 bg-gray-800 rounded-full mb-4">
+                        <div class="h-2 bg-yellow-500" style="width: 76%"></div>
+                    </div>
+
+                    <div class="flex justify-between mb-3">
+                        <span class="text-sm text-gray-400">500 Users</span>
+                        <span class="text-sm text-gray-400">42% Success</span>
+                    </div>
+                    <div class="h-2 bg-gray-800 rounded-full">
+                        <div class="h-2 bg-red-500" style="width: 42%"></div>
+                    </div>
+                </div>
+
+                <div class="metric-card rounded-xl p-6 border border-gray-800">
+                    <h3 class="text-lg font-bold text-white mb-4">Integration Test Status</h3>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <div class="mr-3">
+                                <div class="w-6 h-6 rounded-full bg-green-900/30 flex items-center justify-center">
+                                    <i class="fas fa-check text-green-400 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm text-white">API Gateway ⇨ Auth Service</div>
+                                <div class="text-xs text-gray-500">OAuth2 token validation</div>
+                            </div>
+                            <div class="text-green-400">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="mr-3">
+                                <div class="w-6 h-6 rounded-full bg-green-900/30 flex items-center justify-center">
+                                    <i class="fas fa-check text-green-400 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm text-white">Mahasiswa Service ⇨ PostgreSQL</div>
+                                <div class="text-xs text-gray-500">Database CRUD operations</div>
+                            </div>
+                            <div class="text-green-400">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="mr-3">
+                                <div class="w-6 h-6 rounded-full bg-green-900/30 flex items-center justify-center">
+                                    <i class="fas fa-check text-green-400 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm text-white">Event Producer ⇨ Kafka</div>
+                                <div class="text-xs text-gray-500">Message publishing to topic</div>
+                            </div>
+                            <div class="text-green-400">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="mr-3">
+                                <div class="w-6 h-6 rounded-full bg-yellow-900/30 flex items-center justify-center">
+                                    <i class="fas fa-exclamation text-yellow-400 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm text-white">Notification Service ⇨ Kafka</div>
+                                <div class="text-xs text-gray-500">Message consumption delay</div>
+                            </div>
+                            <div class="text-yellow-400">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <div class="mr-3">
+                                <div class="w-6 h-6 rounded-full bg-red-900/30 flex items-center justify-center">
+                                    <i class="fas fa-times text-red-400 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm text-white">Analytics Service ⇨ Kafka</div>
+                                <div class="text-xs text-gray-500">Schema compatibility error</div>
+                            </div>
+                            <div class="text-red-400">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- Team Project Section -->
+        <div id="tim" class="scroll-offset mb-24">
+            <h2 class="text-3xl font-bold text-center text-white mb-4">Our Development Team</h2>
+            <p class="text-gray-400 text-center max-w-2xl mx-auto mb-12">
+                Meet the individuals behind this microservices architecture project. Our team combines
+                expertise in backend development, DevOps, and database management.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-8">
+                <!-- Team Member 1 -->
+                <div class="team-card rounded-xl p-6 relative overflow-hidden w-full max-w-sm">
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="team-photo mb-4 w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Raihan Rafi Rahmatullah</h3>
+                        <p class="text-primary-400 mb-3">Backend Developer</p>
+                        <p class="text-gray-400 text-sm text-center mb-4">Designed and implemented the REST API
+                            architecture</p>
+                        <div class="flex space-x-3">
+                            <a href="#" class="text-gray-400 hover:text-primary-400">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                </svg>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-blue-400">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="team-card rounded-xl p-6 relative overflow-hidden w-full max-w-sm">
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="team-photo mb-4 w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Bintang Widya Pratama</h3>
+                        <p class="text-purple-400 mb-3">Fullstack Developer</p>
+                        <p class="text-gray-400 text-sm text-center mb-4">Designed and implemented the REST API and
+                            architecture
+                        </p>
+                        <div class="flex space-x-3">
+                            <a href="http://github.com/pppercivalll" class="text-gray-400 hover:text-primary-400">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                </svg>
+                            </a>
+                            <a href="#" class="text-gray-400 hover:text-blue-400">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="team-card rounded-xl p-6 relative overflow-hidden w-full max-w-sm">
+                    <div class="flex flex-col items-center">
+                        <div
+                            class="team-photo mb-4 w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Riski Gana Prasetya</h3>
+                        <p class="text-green-400 mb-3">DevSecOps</p>
+                        <p class="text-gray-400 text-sm text-center mb-4">Implemented Docker & Kubernetes Deployment</p>
+                        <div class="flex space-x-3">
+                            <a href="https://github.com/riskyprsty" class="text-gray-400 hover:text-primary-400">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                </svg>
+                            </a>
+                            <a href="https://riskyprsty.medium.com" class="text-gray-400 hover:text-blue-400">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-24 pt-8 border-t border-gray-800/50 text-center">
+            <div class="flex justify-center mb-6">
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-500 hover:text-primary-400 transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-blue-400 transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-red-500 transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6.066 9.645c.183 4.04-2.83 8.544-8.164 8.544-1.622 0-3.131-.476-4.402-1.291 1.524.18 3.045-.244 4.252-1.189-1.256-.023-2.317-.854-2.684-1.995.451.086.895.061 1.298-.049-1.381-.278-2.335-1.522-2.304-2.853.388.215.83.344 1.301.359-1.279-.855-1.641-2.544-.889-3.835 1.416 1.738 3.533 2.881 5.92 3.001-.419-1.796.944-3.527 2.799-3.527.825 0 1.572.349 2.096.907.654-.128 1.27-.368 1.824-.697-.215.671-.67 1.233-1.263 1.589.581-.07 1.135-.224 1.649-.453-.384.578-.87 1.084-1.433 1.489z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <p class="text-gray-500 mb-4">
+                REST API Mahasiswa | Microservices Project
+            </p>
+            <div class="text-gray-600 text-sm">
+                Containerized with Docker | Orchestrated with Kubernetes | Data streaming with Kafka | PENS 2025
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize GSAP animations when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            // Register ScrollTrigger plugin
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Animate the header content
+            gsap.from('h1', {
+                duration: 1.5,
+                y: 50,
+                opacity: 0,
+                ease: 'power3.out'
+            });
+
+            gsap.from('p', {
+                duration: 1.5,
+                y: 30,
+                opacity: 0,
+                delay: 0.3,
+                ease: 'power3.out'
+            });
+
+            // Animate service cards with staggered effect
+            gsap.from('.service-card', {
+                scrollTrigger: {
+                    trigger: '.grid',
+                    start: 'top 90%',
+                },
+                duration: 0.8,
+                y: 40,
+                opacity: 0,
+                stagger: 0.2,
+                ease: 'back.out(1)'
+            });
+
+            // Animate the system information section
+            gsap.from('.bg-dark-800\\/70', {
+                scrollTrigger: {
+                    trigger: '.bg-dark-800\\/70',
+                    start: 'top 90%',
+                },
+                duration: 1,
+                x: -30,
+                opacity: 0,
+                ease: 'expo.out'
+            });
+
+            // Animate team cards
+            // gsap.from('.team-card', {
+            //     scrollTrigger: {
+            //         trigger: '.team-card',
+            //         start: 'top 90%',
+            //     },
+            //     duration: 0.8,
+            //     y: 40,
+            //     opacity: 0,
+            //     stagger: 0.2,
+            //     ease: 'power2.out'
+            // });
+
+            // Animate features section
+            gsap.from('.bg-dark-800\\/70:last-child', {
+                scrollTrigger: {
+                    trigger: '.bg-dark-800\\/70:last-child',
+                    start: 'top 90%',
+                },
+                duration: 1,
+                y: 40,
+                opacity: 0,
+                ease: 'power2.out'
+            });
+
+            // Create a floating effect for the cards
+            document.querySelectorAll('.service-card, .team-card').forEach(card => {
+                gsap.to(card, {
+                    y: -5,
+                    duration: 2.5,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: 'sine.inOut'
+                });
+            });
+
+            // Kafka stream controls
+            document.getElementById('pauseStream').addEventListener('click', function () {
+                this.classList.add('hidden');
+                document.getElementById('resumeStream').classList.remove('hidden');
+                document.querySelector('.kafka-stream').classList.add('opacity-70');
+            });
+
+            document.getElementById('resumeStream').addEventListener('click', function () {
+                this.classList.add('hidden');
+                document.getElementById('pauseStream').classList.remove('hidden');
+                document.querySelector('.kafka-stream').classList.remove('opacity-70');
+            });
+        });
+
+
+          async function updateClusterInfo() {
+                try {
+                    const res = await fetch('/api/cluster-status');
+                    const data = await res.json();
+
+                    document.getElementById('containers-count').innerText = data.containers;
+                    document.getElementById('nodes-count').innerText = data.nodes;
+                    document.getElementById('cpu-usage').innerText = data.cpu + '%';
+                    document.getElementById('memory-usage').innerText =
+                        data.memoryUsedGi + ' / ' + data.memoryTotalGi + ' GiB';
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            updateClusterInfo();
+            setInterval(updateClusterInfo, 10000);
+    </script>
+</body>
+
+</html>
