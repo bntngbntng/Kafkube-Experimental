@@ -53,23 +53,16 @@ data:
         scheme: https
         tls_config:
           insecure_skip_verify: true
-          server_name: kubernetes.default.svc   
         bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-
+        
         kubernetes_sd_configs:
           - role: node
-
+        
         metrics_path: /metrics/cadvisor
-
+        
         relabel_configs:
-          - source_labels: [__meta_kubernetes_node_condition_ready]
-            action: keep
-            regex: "true"
-
-          - target_label: __address__
-            replacement: 10.43.0.1:443
-
-          - source_labels: [__meta_kubernetes_node_name]
+          - source_labels: [__address__]
             action: replace
-            target_label: __metrics_path__
-            replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+            target_label: __address__
+            regex: '(.+):10250'
+            replacement: '${1}:10250'
