@@ -99,6 +99,8 @@ services:
       KAFKA_TOPIC: mahasiswa_events
       KAFKA_CONSUMER_GROUP: log_processors_group_compose
       KAFKA_CONSUME_FROM_BEGINNING: "true"
+    ports:
+      - "9400:9400"
 
   frontend:
     build:

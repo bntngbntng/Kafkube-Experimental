@@ -17,8 +17,10 @@ spec:
     spec:
       containers:
       - name: consumer-service-container
-        image: pppercivalll/consumer-service
+        image: sister534/consumer-service:latest
         imagePullPolicy: Always
+        ports:
+        - containerPort: 9400 
         env:
         - name: LOG_DATABASE_URL
           valueFrom:
