@@ -15,3 +15,11 @@ rules:
   resources:
   - ingresses
   verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources:
+    - nodes/metrics      
+    - nodes/proxy        
+  verbs:
+    - get
+    - list
+    - watch
