@@ -67,7 +67,7 @@ data:
             regex: "true"
 
           - target_label: __address__
-            replacement: kubernetes.default.svc:443
+            replacement: 10.43.0.1:443  
 
           - source_labels: [__meta_kubernetes_node_name]
             action: replace
