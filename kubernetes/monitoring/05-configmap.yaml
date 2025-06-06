@@ -49,11 +49,11 @@ data:
             action: keep
             regex: 'monitoring;kube-state-metrics;http-metrics'
 
-      # Scrape kubelet’s cAdvisor endpoint ──
       - job_name: 'kubelet-cadvisor'
         scheme: https
         tls_config:
           insecure_skip_verify: true
+          server_name: kubernetes.default.svc   
         bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
         kubernetes_sd_configs:
@@ -67,11 +67,9 @@ data:
             regex: "true"
 
           - target_label: __address__
-            replacement: 10.43.0.1:443  
+            replacement: 10.43.0.1:443
 
           - source_labels: [__meta_kubernetes_node_name]
             action: replace
             target_label: __metrics_path__
-            # When a node is named “node-1”, this expands to:
-            #    /api/v1/nodes/node-1/proxy/metrics/cadvisor
             replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
