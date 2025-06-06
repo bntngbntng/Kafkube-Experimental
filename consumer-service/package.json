@@ -7,7 +7,9 @@
     "start": "node src/consumer.js"
   },
   "dependencies": {
+    "express": "^5.1.0",
+    "kafkajs": "^2.2.4",
     "pg": "^8.11.3",
-    "kafkajs": "^2.2.4"
+    "prom-client": "^15.1.3"
   }
 }
