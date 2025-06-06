@@ -49,29 +49,35 @@ data:
             action: keep
             regex: 'monitoring;kube-state-metrics;http-metrics'
 
-      # Scrape kubelet’s cAdvisor endpoint ──
+      # ── ADD THIS WHOLE BLOCK ──
       - job_name: 'kubelet-cadvisor'
         scheme: https
+        # If your kubelet uses a self-signed cert, skip TLS verify:
         tls_config:
           insecure_skip_verify: true
+        # Use the same ServiceAccount token Prometheus already has mounted
         bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
 
+        # Discover all Kubernetes nodes
         kubernetes_sd_configs:
           - role: node
 
+        # We want /metrics/cadvisor from each node
         metrics_path: /metrics/cadvisor
 
         relabel_configs:
+          # (Optional) only scrape nodes that are Ready
           - source_labels: [__meta_kubernetes_node_condition_ready]
             action: keep
             regex: "true"
 
+          # Replace each node’s “address” with the API server, so we can proxy
           - target_label: __address__
             replacement: kubernetes.default.svc:443
 
+          # Rewrite “/metrics” path into the API‐server‐proxy path for each node:
+          #   /api/v1/nodes/<node-name>/proxy/metrics/cadvisor
           - source_labels: [__meta_kubernetes_node_name]
             action: replace
             target_label: __metrics_path__
-            # When a node is named “node-1”, this expands to:
-            #    /api/v1/nodes/node-1/proxy/metrics/cadvisor
             replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
