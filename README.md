@@ -162,6 +162,7 @@ Or check the DB Main and DB Log:
     Prometheus:
     ![Structural Poverty](docs/Step3-5.png)
     5. Alternatively, you can do it manually via script that located in `/tests` and execute `/.latency-test.sh`.
+    
     ![Structural Poverty](docs/Step4-5.png)
 * **Results**: Table of timestamps and latency values. Compute statistics: average, min, max, P95, and P99.
 
