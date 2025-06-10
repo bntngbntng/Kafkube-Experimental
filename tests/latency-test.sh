@@ -4,8 +4,8 @@ set -e
 
 # k8s
 NAMESPACE="mahasiswa-app"
-SERVICE_API="rest-api"
-SERVICE_DB_LOG="postgres-db-log"
+SERVICE_API="rest-api-service"
+SERVICE_DB_LOG="postgres-db-log-service"
 
 # Port forwading
 LOCAL_API_PORT=3000
@@ -21,7 +21,7 @@ BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/05-latency-test && pwd)"
 # =============================================================================
 cleanup() {
   echo ""
-  echo "⚙️  Stopping port-forward..."
+  echo "⚙  Stopping port-forward..."
   kill "$PF_API_PID" "$PF_DB_PID" 2>/dev/null || true
   exit 0
 }
@@ -31,7 +31,7 @@ trap cleanup SIGINT SIGTERM
 echo "📦 Check dependensi Node.js..."
 
 if [ ! -d "${BASE_DIR}/node_modules" ]; then
-  echo "⚙️  node_modules tidak ditemukan. Menjalankan 'npm install'..."
+  echo "⚙  node_modules tidak ditemukan. Menjalankan 'npm install'..."
   cd "${BASE_DIR}"
   npm install
   echo "✅ npm install selesai."
@@ -39,7 +39,7 @@ else
   echo "✅ node_modules sudah ada, melewati 'npm install'."
 fi
 
-export API_URL="http://localhost:${LOCAL_API_PORT}/api/mahasiswa"
+#export API_URL="http://localhost:${LOCAL_API_PORT}/api/mahasiswa"
 export LOG_DATABASE_URL="postgresql://log_user:log_password@localhost:${LOCAL_DB_PORT}/log_db"
 
 # =============================================================================
@@ -64,7 +64,7 @@ echo "🔗 DB Log dapat diakses di postgresql://log_user:log_password@localhost:
 # =============================================================================
 # latencyTest.js
 # =============================================================================
-echo "▶️  Menjalankan latencyTest.js ..."
+echo "▶  Menjalankan latencyTest.js ..."
 cd "${BASE_DIR}"
 npm test
 
