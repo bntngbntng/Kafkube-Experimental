@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-ingress
+  namespace: monitoring
+  annotations:
+    # rewrite all paths to “/” in case Prometheus/Grafana expect root
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    # if you want automatic TLS via cert-manager:
+    # cert-manager.io/cluster-issuer: “letsencrypt-prod”
+spec:
+  tls:
+    # optional: for HTTPS with cert-manager
+    - hosts:
+        - prometheus.osslab.my.id
+        - grafana.osslab.my.id
+      secretName: monitoring-tls
+  rules:
+    # Prometheus
+    - host: prometheus.osslab.my.id
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-service
+                port:
+                  number: 8080
+    # Grafana
+    - host: grafana.osslab.my.id
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana-service
+                port:
+                  number: 80
