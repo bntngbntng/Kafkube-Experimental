@@ -66,6 +66,12 @@ To run the entire stack locally for development/testing:
     docker build -t <YOUR_DOCKER_REGISTRY_USERNAME>/frontend-last:latest .
     docker push <YOUR_DOCKER_REGISTRY_USERNAME>/frontend-last:latest
     cd ..
+
+    # For Dashboard  Frontend (Landingpage)
+    cd dashboard-frontend/
+    docker build -t <YOUR_DOCKER_REGISTRY_USERNAME>/dashboard-frontend:latest .
+    docker push <YOUR_DOCKER_REGISTRY_USERNAME>/dashboard-frontend:latest
+    cd ..
     ```
     *Alternatively (for Minikube only), you can use eval $(minikube -p minikube docker-env).*
 
