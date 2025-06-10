@@ -82,7 +82,8 @@ To run the entire stack locally for development/testing:
     kubectl get nodes
     ```
     **Or ensure your k3s is recognizing your kubectl.**
-
+    
+---
 ### Deployment with Script (deploy-all.sh)
 
 This method is now using files that located in `/kubernetes/` for every components. Ergo, make sure you are on `/scripts/` and execute `./deploy-all.sh`.
@@ -90,39 +91,41 @@ This method is now using files that located in `/kubernetes/` for every componen
 ---
 ## Testing Scenarios
 
-The following is a summary of the test scenarios. Make sure all services are running in Kubernetes.
+The following is a temporary summary of the test scenarios. Make sure all services are running in Kubernetes.
 
 ### 1. Event Publish Test
 * **Goals**: Ensure events are published to Kafka.
 * **Steps**:
-    1.  Listen to Kafka topic mahasiswa_events:
-        ```bash
-        kubectl run kafkacat-listener -n mahasiswa-app --image=edenhill/kcat:1.7.1 --restart=Never --rm -it -- \
-        kcat -b kafka-headless.mahasiswa-app.svc.cluster.local:9092 -t mahasiswa_events -C -J -q
-        ```
-    2.  Submit a POST request to the /api/mahasiswa endpoint of your REST API with the new student information.
-* **Results**: Record the API request and response. Verify that the JSON message appears in kafkacat-listener (check eventType, data, and timestamp_api_sent).
+    1.  After KafkaUI integration, first of all, add data mahasiswa that already linked to `http://sister.osslab.my.id/`.
+    ![Structural Poverty](docs/Step1-1.png)
+    2. Finally you can check inside the KafkaUI that already linked to ``https://kafkaui.osslab.my.id/`` and check the Topics section.
+    ![Structural Poverty](docs/Step2-1.png)
+    3.  (Optional) Submit a POST request (via 3rd party e.g. Postman or Insomnia) to /api/mahasiswa endpoint of your REST API with the new student information, the link is the same `http:/ sister.osslab.my.id/`.
+* **Results**: Record the API request and response. Verify that the JSON message appears in the KafkaUI panel.
 
 ### 2. Consumer Test
 * **Goals**: Ensure the consumer processes events and logs them correctly.
 * **Steps**:
-    1.  Send a POST request to the API as described above.
+    1.  Add a data mahasiswa first or send a POST request to the API as described above.
     2.  Wait a few moments.
-    3.  Port-forward to the log database service:
-        ```bash
-        # Adjust the service name and local port if needed
-        kubectl port-forward svc/<nama-service-db-log> -n mahasiswa-app 5433:5432
-        ```
-    4.  Use a database tool (e.g., DBeaver, pgAdmin) to connect to localhost:5433 and check the event_logs table.
-    5.  Check the consumer pod logs: `kubectl logs -l <label-selector-consumer> -n mahasiswa-app -f`.
+    3.  Use a database tool (e.g., DBeaver, pgAdmin) to connect to this URL `https://postgre.osslab.my.id/` (user: pgadmin4@test.com | password: admin123)
+    ![Structural Poverty](docs/Step1-2.png)
+    4.  Don't forget to check the consumer pod logs: `kubectl logs -l <label-selector-consumer> -n mahasiswa-app -f`.
+    ![Structural Poverty](docs/Step2-2.png)
+    ![Structural Poverty](docs/Step2a-2.png)
 * **Results**: A screenshot of the new data in event_logs. Verify event_type, payload, and all timestamps.
 
 ### 3. Integration Test
 * **Goals**: Verify all components are connected and functioning end-to-end.
 * **Steps**:
     1.  Ensure all pods (rest-api, consumer-service, Kafka, DBs) are in Running state: `kubectl get pods -n mahasiswa-app`.
-    2.  Check the ConfigMap: (`kubectl get cm app-config -n mahasiswa-app -o yaml`) and environment variables in API/Consumer pods:(`kubectl exec <pod> -n mahasiswa-app -- printenv`).
-    3.  Perform the full end-to-end flow: `POST` data -> Check Main DB (via port-forward) -> (Optional) Check Kafka -> Check DB Log.
+    ![Structural Poverty](docs/Step1-3.png)
+    2.  Check the ConfigMap: (`kubectl get cm app-config -n mahasiswa-app -o yaml`)
+    ![Structural Poverty](docs/Step2-3.png)
+    or check:(`kubectl get svc -n mahasiswa-app`) and ('kubectl get nodes')
+    ![Structural Poverty](docs/Step2a-3.png)
+    3.  Alternatively, you can check that in the dashboard page.
+    ![Structural Poverty](docs/Step3-3.png)
 * **Results**: Screenshot of pod and service statuses. Document successful data flow.
 
 ### 4. Horizontal Scaling Test (Consumer Service)
