@@ -50,7 +50,7 @@ To run the entire stack locally for development/testing:
     Replace <YOUR_DOCKER_REGISTRY_USERNAME> with your Docker Hub username or private registry path. But before that, you shall login into Docker Hub and configure "docker login" first for further development. Skip this step if you already had one or just use my image.
     ```bash
     # For REST API
-    cd rest-api-mahasiswa/
+    cd api-service/
     docker build -t <YOUR_DOCKER_REGISTRY_USERNAME>/rest-api-mahasiswa:latest .	
     docker push <YOUR_DOCKER_REGISTRY_USERNAME>/rest-api-mahasiswa:latest
     cd ..
@@ -59,6 +59,12 @@ To run the entire stack locally for development/testing:
     cd consumer-service/
     docker build -t <YOUR_DOCKER_REGISTRY_USERNAME>/consumer-service:latest .
     docker push <YOUR_DOCKER_REGISTRY_USERNAME>/consumer-service:latest
+    cd ..
+
+    # For Frontend
+    cd mahasiswa-app-frontend/
+    docker build -t <YOUR_DOCKER_REGISTRY_USERNAME>/frontend-last:latest .
+    docker push <YOUR_DOCKER_REGISTRY_USERNAME>/frontend-last:latest
     cd ..
     ```
     *Alternatively (for Minikube only), you can use eval $(minikube -p minikube docker-env).*
