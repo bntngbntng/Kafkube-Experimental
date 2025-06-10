@@ -131,22 +131,36 @@ The following is a temporary summary of the test scenarios. Make sure all servic
 ### 4. Horizontal Scaling Test (Consumer Service)
 * **Goals**: Ensure no duplicate processing occurs when scaling the consumer.
 * **Steps**:
-    1.  Initially, ensure the consumer-service deployment is set to replicas: 1.
-    2.  Send several messages. Verify no duplicates in event_logs.
-    3.  Scale: `kubectl scale deployment consumer-service -n mahasiswa-app --replicas=2` (or 3).
-    4.  Wait for the new pods to reach Running state..
-    5.  Send additional messages.
-* **Results**: Screenshot of: `kubectl get pods -n mahasiswa-app -l <label-selector-consumer>`. Check logs from all consumer pods. **CAUTION**: Verify that no duplicate entries exist in event_logs.
+    1.  Scale: `kubectl scale deployment consumer-service -n mahasiswa-app --replicas=2`
+    2.  Wait for the new pods to reach Running state..
+    3.  Send additional messages check `/tests/` folder to execute `./test-load.sh`.
+    ![Structural Poverty](docs/Step2-4.png)
+* **Results**: Screenshot of: `kubectl get pods -l app=consumer-service -n mahasiswa-app -o wide` and `kubectl get deployment consumer-service -n mahasiswa-app -o wide`.
+![Structural Poverty](docs/Step1-4.png)
+Check logs from all consumer pods, for example in the KafkaUI dashboard:
+## KafkaUI
+![Structural Poverty](docs/Step3-4.png)
+Or check the DB Main and DB Log:
+## DB-Log:
+![Structural Poverty](docs/Step4-4.png)
+## DB-Main:
+**CAUTION**: Verify that no duplicate entries exist in event_logs.
 
 ### 5. Latency Test
 * **Goals**: Measure end-to-end delay.
 * **Steps**:
-    1.  Send 10–20 POST requests to the API.
-    2.  Retrieve data from the event_logs table, focusing on: (timestamp_api_sent, timestamp_kafka_received, timestamp_processed).
-    3.  Calculate:
+    1.  Send some POST requests to the API or just use `./test-load.sh`.
+    2.  Retrieve data from the event_logs table, focusing on: (timestamp_api_sent, timestamp_kafka_received, timestamp_processed) that Consumer-Service provided for measure the metrics.
+    3.  If you prepare for manual calculate you can go straigt into DB Log:
         * $L_{end-to-end} = \text{timestamp_processed} - \text{timestamp_api_sent}$
         * $L_{consumer\_processing} = \text{timestamp_processed} - \text{timestamp_kafka_received}$
         * $L_{kafka\_queue} = \text{timestamp_kafka_received} - \text{timestamp_api_sent}$
+    4. If you don't, then go straight to Grafana and Prometheus:
+    Grafana:
+    ![Structural Poverty](docs/Step2-5.png)
+    Prometheus:
+    ![Structural Poverty](docs/Step3-5.png)
+    5. Alternatively, you can do it manually via script that located in `/tests` and execute `/.latency-test.sh`. 
 * **Results**: Table of timestamps and latency values. Compute statistics: average, min, max, P95, and P99.
 
 ---
