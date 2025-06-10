@@ -27,10 +27,10 @@ Ensure the following software is installed:
 
 ---
 ## Project Schema(s)
-**Via Docker-Compose**
+**Via Kubernetes**
 ![Structural Poverty](docs/Schemas1.png)
 
-**Via Kubernetes**
+**Via Docker-Compose**
 ![Structural Poverty](docs/Schemas2.png)
 
 ---
