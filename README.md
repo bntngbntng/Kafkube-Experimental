@@ -144,6 +144,7 @@ Or check the DB Main and DB Log:
 ## DB-Log:
 ![Structural Poverty](docs/Step4-4.png)
 ## DB-Main:
+![Structural Poverty](docs/Step5-4.png)
 **CAUTION**: Verify that no duplicate entries exist in event_logs.
 
 ### 5. Latency Test
@@ -160,7 +161,8 @@ Or check the DB Main and DB Log:
     ![Structural Poverty](docs/Step2-5.png)
     Prometheus:
     ![Structural Poverty](docs/Step3-5.png)
-    5. Alternatively, you can do it manually via script that located in `/tests` and execute `/.latency-test.sh`. 
+    5. Alternatively, you can do it manually via script that located in `/tests` and execute `/.latency-test.sh`.
+    ![Structural Poverty](docs/Step4-5.png)
 * **Results**: Table of timestamps and latency values. Compute statistics: average, min, max, P95, and P99.
 
 ---
