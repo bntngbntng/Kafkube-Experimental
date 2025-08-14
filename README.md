@@ -171,4 +171,8 @@ Or check the DB Main and DB Log:
 
 Deleting all deployed resources, you can just go straight to `/scripts/` and just execute `./delete-all.sh`
 
+---
+## Note
+I made it with my own production, ergo, you shall make it your own. This repository is probably unmaintained for awhile or anytime soon.
+
 
