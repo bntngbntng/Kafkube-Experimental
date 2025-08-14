@@ -162,7 +162,6 @@ Or check the DB Main and DB Log:
     Prometheus:
     ![Structural Poverty](docs/Step3-5.png)
     5. Alternatively, you can do it manually via script that located in `/tests` and execute `/.latency-test.sh`.
-    
     ![Structural Poverty](docs/Step4-5.png)
 * **Results**: Table of timestamps and latency values. Compute statistics: average, min, max, P95, and P99.
 
@@ -173,6 +172,7 @@ Deleting all deployed resources, you can just go straight to `/scripts/` and jus
 
 ---
 ## Note
-I made it with my own production, ergo, you shall make it your own. This repository is probably unmaintained for awhile or anytime soon.
+1. **I made it with my own production, ergo, you shall make it your own. For further context, in this tutorial, I use K3S instead of Minikube for instance.**
+2. **This repository is probably not going to be maintained for awhile or anytime soon.**
 
 
