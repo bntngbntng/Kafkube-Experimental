@@ -1,5 +1,6 @@
 # Kafkube Experimental
 
+## Description
 This project implements a REST API system for student data integrated with Apache Kafka for asynchronous event processing. All services run in Docker containers and are orchestrated using Kubernetes.
 
 ---
