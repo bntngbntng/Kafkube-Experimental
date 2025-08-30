@@ -205,6 +205,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 ---
 ## Note
+
 1. **I made it with my own production, ergo, you shall make it your own. For further context, in this tutorial, I use K3S instead of Minikube for instance.**
 2. **This repository is probably not going to be maintained for awhile or anytime soon.**
 
