@@ -5,6 +5,22 @@
 This project implements a REST API system for student data integrated with Apache Kafka for asynchronous event processing. All services run in Docker containers and are orchestrated using Kubernetes.
 
 ---
+## Table of Contents
+
+- [Description](#description)
+- [Tech Stacks](#tech-stacks)
+- [Requirements](#requirements)
+- [Project Schema(s)](#project-schemas)
+- [Local Development with Docker Compose](#local-development-with-docker-compose)
+- [Kubernetes Deployment](#kubernetes-deployment)
+  - [Deployment with Script (deploy-all.sh)](#deployment-with-script-deploy-allsh)
+- [Testing Scenarios](#testing-scenarios)
+- [Cleanup](#cleanup)
+- [Contributing](#contributing)
+- [Note](#note)
+- [License](#license)
+
+---
 ## Tech Stacks
 
 The system consists of several main components:
