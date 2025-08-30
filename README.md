@@ -213,3 +213,5 @@ If you have a suggestion that would make this better, please fork the repo and c
 ## License
 
 This project is licensed under the [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) - see the [LICENSE](LICENSE) file for details.
+
+---
